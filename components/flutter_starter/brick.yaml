@@ -1,5 +1,5 @@
 name: flutter_starter
-description: A Codika component.
+description: A starter Flutter component that provides the initial counter app template, serving as a base foundation for Flutter application development.
 
 # The following defines the brick repository url.
 # Uncomment and update the following line before publishing the brick.

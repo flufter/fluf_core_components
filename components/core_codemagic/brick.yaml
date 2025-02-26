@@ -1,5 +1,5 @@
 name: core_codemagic
-description: A flutter brick that fits into a PADI architecture.
+description: A Flutter brick that generates Codemagic CI/CD configuration files for your project. It sets up workflows for iOS and Android builds with environment-specific configurations (staging, test, production). Supports Firebase and Shorebird integration.
 
 # The following defines the brick repository url.
 # Uncomment and update the following line before publishing the brick.

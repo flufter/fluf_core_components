@@ -1,5 +1,5 @@
 name: core_firebase
-description: A Codika component.
+description: A Flutter component that modifies the app's entry points to handle environment-dependent Firebase configurations. It sets up the necessary Firebase initialization and configuration files for different environments (development, staging, test and production).
 
 # The following defines the brick repository url.
 # Uncomment and update the following line before publishing the brick.

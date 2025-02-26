@@ -1,5 +1,5 @@
 name: core_app_icon
-description: A Codika component.
+description: A Flutter component that manages app icons across different platforms. This brick generates the necessary configuration and assets structure for handling multiple app icons, supporting iOS and Android platforms with environment-specific variations (dev, staging, test, prod).
 
 # The following defines the brick repository url.
 # Uncomment and update the following line before publishing the brick.

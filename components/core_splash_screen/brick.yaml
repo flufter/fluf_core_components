@@ -1,5 +1,5 @@
 name: core_splash_screen
-description: A Codika component.
+description: A Codika component that automates the creation of custom native splash screens using the flutter_native_splash package. This brick simplifies the process of configuring and generating native splash screens for both Android and iOS platforms, ensuring a consistent and professional app launch experience.
 
 # The following defines the brick repository url.
 # Uncomment and update the following line before publishing the brick.

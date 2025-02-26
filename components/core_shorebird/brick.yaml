@@ -1,5 +1,5 @@
 name: core_shorebird
-description: A Codika component.
+description: A configuration brick that initializes Shorebird in a Flutter project. This brick doesn't contain any files but configures the necessary Shorebird CLI setup to enable code push functionality in your Flutter application. It prepares your project for over-the-air updates without requiring app store reviews.
 
 # The following defines the brick repository url.
 # Uncomment and update the following line before publishing the brick.

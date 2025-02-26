@@ -1,5 +1,5 @@
 name: core_flavors
-description: A flutter brick that fits into a PADI architecture.
+description: A Flutter brick that sets up environment flavors using flutter_flavorizr. Creates configuration for multiple environments (development, staging, testing, production) with separate app configurations.
 
 # The following defines the brick repository url.
 # Uncomment and update the following line before publishing the brick.
