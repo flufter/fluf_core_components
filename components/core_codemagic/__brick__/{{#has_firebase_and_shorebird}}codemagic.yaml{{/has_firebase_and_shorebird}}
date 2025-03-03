@@ -21,6 +21,34 @@ definitions:
       - build/**/outputs/**/mapping.txt
       - flutter_drive.log
   scripts:
+    - &is_regular_build
+        name: Exit if not a regular build
+        script: | 
+          set -e
+          set -x
+          export COMMIT_MSG=$(git log -1 --pretty=%B)
+          echo COMMIT_MSG
+          if [[ $COMMIT_MSG != *"buildcd"* ]]
+            then
+              echo "Commit needs to include 'buildcd' in it's message."
+              exit 1
+            else 
+              echo "Commit message includes 'buildcd', moving forward..."
+          fi
+    - &is_patch_build
+        name: Exit if not a patch build
+        script: | 
+          set -e
+          set -x
+          export COMMIT_MSG=$(git log -1 --pretty=%B)
+          echo COMMIT_MSG
+          if [[ $COMMIT_MSG != *"patchcd"* ]]
+            then
+              echo "Commit needs to include 'patchcd' in it's message."
+              exit 1
+            else 
+              echo "Commit message includes 'patchcd', moving forward..."
+          fi
     - &get_version_from_pubspec
         name: Get Full Version from Pubspec
         script: |
@@ -409,14 +437,17 @@ workflows:
       events:
         - push
       branch_patterns:
-        - pattern: 'prod'
+        - pattern: release/v+([0-9]).+([0-9]).+([0-9])-prod
           include: true
           source: true
+    when:
+      condition: env.CM_COMMIT_MESSAGE contains "first-push
     cache:
       cache_paths:
         - $FLUTTER_ROOT/.pub-cache
         - $HOME/Library/Caches/CocoaPods
     scripts:
+      - *is_regular_build
       - *get_version_from_pubspec
       - *tools_install_flutterfire
       - *tools_install_shorebird
@@ -476,6 +507,7 @@ workflows:
         - $FLUTTER_ROOT/.pub-cache
         - $HOME/Library/Caches/CocoaPods
     scripts:
+      - *is_patch_build
       - *get_version_from_pubspec
       - *tools_install_flutterfire
       - *tools_verify_flutterfire
@@ -521,6 +553,7 @@ workflows:
         - $FLUTTER_ROOT/.pub-cache
         - $HOME/Library/Caches/CocoaPods
     scripts:
+      - *is_regular_build
       - *get_version_from_pubspec
       - *tools_install_flutterfire
       - *tools_install_shorebird
@@ -580,6 +613,7 @@ workflows:
         - $FLUTTER_ROOT/.pub-cache
         - $HOME/Library/Caches/CocoaPods
     scripts:
+      - *is_patch_build
       - *get_version_from_pubspec
       - *tools_install_flutterfire
       - *tools_verify_flutterfire
@@ -625,6 +659,7 @@ workflows:
         - $FLUTTER_ROOT/.pub-cache
         - $HOME/Library/Caches/CocoaPods
     scripts:
+      - *is_regular_build
       - *get_version_from_pubspec
       - *tools_install_flutterfire
       - *tools_install_shorebird
@@ -684,6 +719,7 @@ workflows:
         - $FLUTTER_ROOT/.pub-cache
         - $HOME/Library/Caches/CocoaPods
     scripts:
+      - *is_patch_build
       - *get_version_from_pubspec
       - *tools_install_flutterfire
       - *tools_verify_flutterfire
