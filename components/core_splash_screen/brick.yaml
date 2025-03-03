@@ -8,7 +8,7 @@ description: A Codika component that automates the creation of custom native spl
 # The following defines the version and build number for your brick.
 # A version number is three numbers separated by dots, like 1.2.34
 # followed by an optional build number (separated by a +).
-version: 0.2.41
+version: 0.2.42
 
 # The following defines the environment for the current brick.
 # It includes the version of mason that the brick requires.
