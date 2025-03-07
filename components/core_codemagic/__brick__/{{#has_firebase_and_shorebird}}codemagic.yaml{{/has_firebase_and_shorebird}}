@@ -437,7 +437,7 @@ workflows:
       events:
         - push
       branch_patterns:
-        - pattern: release/v+([0-9]).+([0-9]).+([0-9])-prod
+        - pattern: 'release/v+([0-9]).+([0-9]).+([0-9])-prod'
           include: true
           source: true
     when:
@@ -499,7 +499,7 @@ workflows:
       events:
         - push
       branch_patterns:
-        - pattern: 'prod-patch'
+        - pattern: 'release/v+([0-9]).+([0-9]).+([0-9])-prod-patch'
           include: true
           source: true
     cache:
@@ -521,112 +521,6 @@ workflows:
       - *font_build_awesome
       - *ios_patch
   {{/has_prod_env}}
-  {{#has_test_env}}
-  ios-test:
-    name: Test iOS (build)
-    <<: *server_instance
-    integrations:
-      app_store_connect: {{app_store_connect_key_codemagic_name}}
-    environment:
-      <<: *env_versions
-      ios_signing:
-        certificates:
-          - {{codemagic_certificate_name}}
-        provisioning_profiles:
-          - {{codemagic_provisioning_profile_name_prod}}
-      vars:
-        APP_ID: {{app_id_ios_test}}
-        ENV: test
-      groups:
-        - config_vars_test
-        - code_signing
-        - shorebird
-    triggering:
-      events:
-        - push
-      branch_patterns:
-        - pattern: 'test'
-          include: true
-          source: true
-    cache:
-      cache_paths:
-        - $FLUTTER_ROOT/.pub-cache
-        - $HOME/Library/Caches/CocoaPods
-    scripts:
-      - *is_regular_build
-      - *get_version_from_pubspec
-      - *tools_install_flutterfire
-      - *tools_install_shorebird
-      - *config_copy_files
-      - *signing_init_keychain
-      - *signing_add_certificates
-      - *signing_setup_xcode
-      - *deps_get_flutter
-      - *deps_install_pods
-      - *font_build_awesome
-      - *ios_build
-      - *crash_upload_dsym
-    artifacts:
-      - build/ios/ipa/*.ipa
-      - /tmp/xcodebuild_logs/*.log
-      - flutter_drive.log
-      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
-      - build/ios/archive/Runner.xcarchive/dSYMs/*.dSYM
-    publishing:
-      << : *email_build_status
-      app_store_connect:
-        auth: integration
-        submit_to_app_store: true
-        submit_to_testflight: true
-        expire_build_submitted_for_review: true
-        cancel_previous_submissions: true
-        release_type: MANUAL
-        copyright: {{ios_copyright}}
-  ios-test-patch:
-    name: Test iOS (patch)
-    <<: *server_instance
-    integrations:
-      app_store_connect: {{app_store_connect_key_codemagic_name}}
-    environment:
-      <<: *env_versions
-      ios_signing:
-        certificates:
-          - {{codemagic_certificate_name}}
-        provisioning_profiles:
-          - {{codemagic_provisioning_profile_name_test}}
-      vars:
-        APP_ID: {{app_id_ios_test}}
-        ENV: test
-      groups:
-        - config_vars_test
-        - code_signing
-        - shorebird
-    triggering:
-      events:
-        - push
-      branch_patterns:
-        - pattern: 'test-patch'
-          include: true
-          source: true
-    cache:
-      cache_paths:
-        - $FLUTTER_ROOT/.pub-cache
-        - $HOME/Library/Caches/CocoaPods
-    scripts:
-      - *is_patch_build
-      - *get_version_from_pubspec
-      - *tools_install_flutterfire
-      - *tools_verify_flutterfire
-      - *tools_install_shorebird
-      - *config_copy_files
-      - *signing_init_keychain
-      - *signing_add_certificates
-      - *signing_setup_xcode
-      - *deps_get_flutter
-      - *deps_install_pods
-      - *font_build_awesome
-      - *ios_patch
-  {{/has_test_env}}
   {{#has_stag_env}}
   ios-stag:
     name: Staging iOS (build)
@@ -651,7 +545,7 @@ workflows:
       events:
         - push
       branch_patterns:
-        - pattern: 'stag'
+        - pattern: 'release/v+([0-9]).+([0-9]).+([0-9])-stag'
           include: true
           source: true
     cache:
@@ -711,7 +605,7 @@ workflows:
       events:
         - push
       branch_patterns:
-        - pattern: 'stag-patch'
+        - pattern: 'release/v+([0-9]).+([0-9]).+([0-9])-stag-patch'
           include: true
           source: true
     cache:
@@ -733,6 +627,112 @@ workflows:
       - *font_build_awesome
       - *ios_patch
   {{/has_stag_env}}
+  {{#has_test_env}}
+  ios-test:
+    name: Test iOS (build)
+    <<: *server_instance
+    integrations:
+      app_store_connect: {{app_store_connect_key_codemagic_name}}
+    environment:
+      <<: *env_versions
+      ios_signing:
+        certificates:
+          - {{codemagic_certificate_name}}
+        provisioning_profiles:
+          - {{codemagic_provisioning_profile_name_prod}}
+      vars:
+        APP_ID: {{app_id_ios_test}}
+        ENV: test
+      groups:
+        - config_vars_test
+        - code_signing
+        - shorebird
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: 'release/v+([0-9]).+([0-9]).+([0-9])-test'
+          include: true
+          source: true
+    cache:
+      cache_paths:
+        - $FLUTTER_ROOT/.pub-cache
+        - $HOME/Library/Caches/CocoaPods
+    scripts:
+      - *is_regular_build
+      - *get_version_from_pubspec
+      - *tools_install_flutterfire
+      - *tools_install_shorebird
+      - *config_copy_files
+      - *signing_init_keychain
+      - *signing_add_certificates
+      - *signing_setup_xcode
+      - *deps_get_flutter
+      - *deps_install_pods
+      - *font_build_awesome
+      - *ios_build
+      - *crash_upload_dsym
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+      - build/ios/archive/Runner.xcarchive/dSYMs/*.dSYM
+    publishing:
+      << : *email_build_status
+      app_store_connect:
+        auth: integration
+        submit_to_app_store: true
+        submit_to_testflight: true
+        expire_build_submitted_for_review: true
+        cancel_previous_submissions: true
+        release_type: MANUAL
+        copyright: {{ios_copyright}}
+  ios-test-patch:
+    name: Test iOS (patch)
+    <<: *server_instance
+    integrations:
+      app_store_connect: {{app_store_connect_key_codemagic_name}}
+    environment:
+      <<: *env_versions
+      ios_signing:
+        certificates:
+          - {{codemagic_certificate_name}}
+        provisioning_profiles:
+          - {{codemagic_provisioning_profile_name_test}}
+      vars:
+        APP_ID: {{app_id_ios_test}}
+        ENV: test
+      groups:
+        - config_vars_test
+        - code_signing
+        - shorebird
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: 'release/v+([0-9]).+([0-9]).+([0-9])-test-patch'
+          include: true
+          source: true
+    cache:
+      cache_paths:
+        - $FLUTTER_ROOT/.pub-cache
+        - $HOME/Library/Caches/CocoaPods
+    scripts:
+      - *is_patch_build
+      - *get_version_from_pubspec
+      - *tools_install_flutterfire
+      - *tools_verify_flutterfire
+      - *tools_install_shorebird
+      - *config_copy_files
+      - *signing_init_keychain
+      - *signing_add_certificates
+      - *signing_setup_xcode
+      - *deps_get_flutter
+      - *deps_install_pods
+      - *font_build_awesome
+      - *ios_patch
+  {{/has_test_env}}
   # android-prod:
   #   name: Prod Android
   #   instance_type: mac_mini_m1
