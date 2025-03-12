@@ -14,6 +14,9 @@ flavorizr:
           background: "assets/envs/dev/app-icon-background.png"
       ios:
         bundleId: "{{ios_bundle_id}}.dev"
+        icon: "assets/envs/dev/app-icon.png"
+      macos:
+        bundleId: "{{ios_bundle_id}}.dev"
         icon: "assets/envs/dev/app-icon.png"{{/has_dev_env}}
     {{#has_stag_env}}stag:
       app:
@@ -25,6 +28,9 @@ flavorizr:
           foreground: "assets/envs/stag/app-icon-foreground.png"
           background: "assets/envs/stag/app-icon-background.png"
       ios:
+        bundleId: "{{ios_bundle_id}}.stag"
+        icon: "assets/envs/stag/app-icon.png"
+      macos:
         bundleId: "{{ios_bundle_id}}.stag"
         icon: "assets/envs/stag/app-icon.png"{{/has_stag_env}}
     {{#has_test_env}}test:
@@ -38,6 +44,9 @@ flavorizr:
           background: "assets/envs/test/app-icon-background.png"
       ios:
         bundleId: "{{ios_bundle_id}}.test"
+        icon: "assets/envs/test/app-icon.png"
+      macos:
+        bundleId: "{{ios_bundle_id}}.test"
         icon: "assets/envs/test/app-icon.png"{{/has_test_env}}
     {{#has_prod_env}}prod:
       app:
@@ -49,5 +58,8 @@ flavorizr:
           foreground: "assets/envs/prod/app-icon-foreground.png"
           background: "assets/envs/prod/app-icon-background.png"
       ios:
+        bundleId: "{{ios_bundle_id}}"
+        icon: "assets/envs/prod/app-icon.png"
+      macos:
         bundleId: "{{ios_bundle_id}}"
         icon: "assets/envs/prod/app-icon.png"{{/has_prod_env}}
