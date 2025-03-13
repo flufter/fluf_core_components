@@ -23,7 +23,7 @@ Future<void> run(HookContext context) async {
   if (environments != null) {
     context.vars['has_dev_env'] = environments.contains('dev');
     context.vars['has_stag_env'] = environments.contains('stag');
-    context.vars['has_test_env'] = environments.contains('test');
+    context.vars['has_testing_env'] = environments.contains('testing');
     context.vars['has_prod_env'] = environments.contains('prod');
   }
 }

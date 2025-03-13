@@ -36,6 +36,6 @@ vars:
     values:
       - dev
       - stag
-      - test
+      - testing
       - prod
     prompt: Which environments do you want to create?

@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="PROD | Profile" type="FlutterRunConfigurationType" factoryName="Flutter">
     <option name="additionalArgs" value="--profile" />
-    <option name="additionalArgs" value="--dart-define-from-file=.codika/config/.env" />
+    <option name="additionalArgs" value="--dart-define-from-file=.codika/config/prod/.env" />
     <option name="buildFlavor" value="prod" />
     <option name="filePath" value="$PROJECT_DIR$/lib/main_prod.dart" />
     <method v="2" />

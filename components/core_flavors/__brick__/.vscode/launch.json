@@ -33,35 +33,35 @@
             "args" : ["--flavor", "dev"]
         },
         {{/has_dev_env}}
-        {{#has_test_env}}
+        {{#has_testing_env}}
         {
             "name": "TEST | Debug",
             "request": "launch",
             "type": "dart",
-            "program": "lib/main_test.dart",
+            "program": "lib/main_testing.dart",
             "flutterMode": "debug",
-            "toolArgs": ["--dart-define-from-file=.codika/config/test/.env"],
-            "args" : ["--flavor", "test"]
+            "toolArgs": ["--dart-define-from-file=.codika/config/testing/.env"],
+            "args" : ["--flavor", "testing"]
         },
         {
             "name": "TEST | Profile",
             "request": "launch",
             "type": "dart",
-            "program": "lib/main_test.dart",
+            "program": "lib/main_testing.dart",
             "flutterMode": "profile",
-            "toolArgs": ["--dart-define-from-file=.codika/config/test/.env"],
-            "args" : ["--flavor", "test"]
+            "toolArgs": ["--dart-define-from-file=.codika/config/testing/.env"],
+            "args" : ["--flavor", "testing"]
         },
         {
             "name": "TEST | Release",
             "request": "launch",
             "type": "dart",
-            "program": "lib/main_test.dart",
+            "program": "lib/main_testing.dart",
             "flutterMode": "release",
-            "toolArgs": ["--dart-define-from-file=.codika/config/test/.env"],
-            "args" : ["--flavor", "test"]
+            "toolArgs": ["--dart-define-from-file=.codika/config/testing/.env"],
+            "args" : ["--flavor", "testing"]
         },
-        {{/has_test_env}}
+        {{/has_testing_env}}
         {{#has_stag_env}}
         {
             "name": "STAG | Debug",

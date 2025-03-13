@@ -1,5 +1,5 @@
 name: core_codemagic
-description: A Flutter brick that generates Codemagic CI/CD configuration files for your project. It sets up workflows for iOS and Android builds with environment-specific configurations (staging, test, production). Supports Firebase and Shorebird integration.
+description: A Flutter brick that generates Codemagic CI/CD configuration files for your project. It sets up workflows for iOS and Android builds with environment-specific configurations (staging, testing, production). Supports Firebase and Shorebird integration.
 
 # The following defines the brick repository url.
 # Uncomment and update the following line before publishing the brick.
@@ -58,11 +58,11 @@ vars:
     description: The name of the provisioning profile in Codemagic
     default: CodeMagic Provisioning Profile (Staging)
     prompt: What name did you give to the provisioning profile in Codemagic (Staging)?
-  codemagic_provisioning_profile_name_test:
+  codemagic_provisioning_profile_name_testing:
     type: string
     description: The name of the provisioning profile in Codemagic
-    default: CodeMagic Provisioning Profile (Test)
-    prompt: What name did you give to the provisioning profile in Codemagic (Test)?
+    default: CodeMagic Provisioning Profile (Testing)
+    prompt: What name did you give to the provisioning profile in Codemagic (Testing)?
   codemagic_provisioning_profile_name_prod:
     type: string
     description: The name of the provisioning profile in Codemagic
@@ -73,11 +73,11 @@ vars:
     description: The App ID for iOS Staging
     default: 1234567890
     prompt: What is the App ID in the App Store Connect (Staging)?
-  app_id_ios_test:
+  app_id_ios_testing:
     type: number
-    description: The App ID for iOS Test
+    description: The App ID for iOS Testing
     default: 1234567890
-    prompt: What is the App ID in the App Store Connect (Test)?
+    prompt: What is the App ID in the App Store Connect (Testing)?
   app_id_ios_prod:
     type: number
     description: The App ID for iOS Production

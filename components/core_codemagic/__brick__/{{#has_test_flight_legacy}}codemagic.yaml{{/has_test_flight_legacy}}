@@ -650,7 +650,7 @@ workflows:
       - *font_build_awesome
       - *ios_patch
   {{/has_prod_env}}
-  {{#has_test_env}}
+  {{#has_testing_env}}
   ios-test:
     name: Test iOS (build)
     <<: *server_instance
@@ -761,7 +761,7 @@ workflows:
       - *deps_install_pods
       - *font_build_awesome
       - *ios_patch
-  {{/has_test_env}}
+  {{/has_testing_env}}
   {{#has_stag_env}}
   ios-stag:
     name: Staging iOS (build)

@@ -33,7 +33,7 @@ flavorizr:
       macos:
         bundleId: "{{ios_bundle_id}}.stag"
         icon: "assets/envs/stag/app-icon.png"{{/has_stag_env}}
-    {{#has_test_env}}test:
+    {{#has_testing_env}}test:
       app:
         name: "{{project_name.titleCase()}} Test"
       android:
@@ -47,7 +47,7 @@ flavorizr:
         icon: "assets/envs/test/app-icon.png"
       macos:
         bundleId: "{{ios_bundle_id}}.test"
-        icon: "assets/envs/test/app-icon.png"{{/has_test_env}}
+        icon: "assets/envs/test/app-icon.png"{{/has_testing_env}}
     {{#has_prod_env}}prod:
       app:
         name: "{{project_name.titleCase()}}"

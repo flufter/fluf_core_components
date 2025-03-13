@@ -5,7 +5,7 @@ enum Flavor {
   {{#has_dev_env}}dev,{{/has_dev_env}}
   {{#has_stag_env}}stag,{{/has_stag_env}}
   {{#has_prod_env}}prod,{{/has_prod_env}}
-  {{#has_test_env}}test,{{/has_test_env}}
+  {{#has_testing_env}}test,{{/has_testing_env}}
 }
 
 class F {
@@ -23,7 +23,7 @@ Flavor getFlavor() {
     {{#has_dev_env}}'dev' => Flavor.dev,{{/has_dev_env}}
     {{#has_prod_env}}'prod' => Flavor.prod,{{/has_prod_env}}
     {{#has_stag_env}}'stag' => Flavor.stag,{{/has_stag_env}}
-    {{#has_test_env}}'test' => Flavor.test,{{/has_test_env}}
+    {{#has_testing_env}}'test' => Flavor.test,{{/has_testing_env}}
     null || '' => Flavor.values.first,
     _ => throw UnsupportedError('Invalid flavor: $flavor'),
   };

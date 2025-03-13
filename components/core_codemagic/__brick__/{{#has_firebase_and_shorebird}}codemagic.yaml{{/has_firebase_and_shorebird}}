@@ -627,9 +627,9 @@ workflows:
       - *font_build_awesome
       - *ios_patch
   {{/has_stag_env}}
-  {{#has_test_env}}
-  ios-test:
-    name: Test iOS (build)
+  {{#has_testing_env}}
+  ios-testing:
+    name: Testing iOS (build)
     <<: *server_instance
     integrations:
       app_store_connect: {{app_store_connect_key_codemagic_name}}
@@ -639,19 +639,19 @@ workflows:
         certificates:
           - {{codemagic_certificate_name}}
         provisioning_profiles:
-          - {{codemagic_provisioning_profile_name_prod}}
+          - {{codemagic_provisioning_profile_name_testing}}
       vars:
-        APP_ID: {{app_id_ios_test}}
-        ENV: test
+        APP_ID: {{app_id_ios_testing}}
+        ENV: testing
       groups:
-        - config_vars_test
+        - config_vars_testing
         - code_signing
         - shorebird
     triggering:
       events:
         - push
       branch_patterns:
-        - pattern: 'release/v+([0-9]).+([0-9]).+([0-9])-test'
+        - pattern: 'release/v+([0-9]).+([0-9]).+([0-9])-testing'
           include: true
           source: true
     cache:
@@ -688,8 +688,8 @@ workflows:
         cancel_previous_submissions: true
         release_type: MANUAL
         copyright: {{ios_copyright}}
-  ios-test-patch:
-    name: Test iOS (patch)
+  ios-testing-patch:
+    name: Testing iOS (patch)
     <<: *server_instance
     integrations:
       app_store_connect: {{app_store_connect_key_codemagic_name}}
@@ -699,19 +699,19 @@ workflows:
         certificates:
           - {{codemagic_certificate_name}}
         provisioning_profiles:
-          - {{codemagic_provisioning_profile_name_test}}
+          - {{codemagic_provisioning_profile_name_testing}}
       vars:
-        APP_ID: {{app_id_ios_test}}
-        ENV: test
+        APP_ID: {{app_id_ios_testing}}
+        ENV: testing
       groups:
-        - config_vars_test
+        - config_vars_testing
         - code_signing
         - shorebird
     triggering:
       events:
         - push
       branch_patterns:
-        - pattern: 'release/v+([0-9]).+([0-9]).+([0-9])-test-patch'
+        - pattern: 'release/v+([0-9]).+([0-9]).+([0-9])-testing-patch'
           include: true
           source: true
     cache:
@@ -732,7 +732,7 @@ workflows:
       - *deps_install_pods
       - *font_build_awesome
       - *ios_patch
-  {{/has_test_env}}
+  {{/has_testing_env}}
   # android-prod:
   #   name: Prod Android
   #   instance_type: mac_mini_m1
