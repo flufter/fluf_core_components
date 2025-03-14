@@ -33,21 +33,21 @@ flavorizr:
       macos:
         bundleId: "{{ios_bundle_id}}.stag"
         icon: "assets/envs/stag/app-icon.png"{{/has_stag_env}}
-    {{#has_testing_env}}test:
+    {{#has_testing_env}}testing:
       app:
-        name: "{{project_name.titleCase()}} Test"
+        name: "{{project_name.titleCase()}} Testing"
       android:
-        applicationId: "{{android_package_name}}.test"  
-        icon: "assets/envs/test/app-icon.png"
+        applicationId: "{{android_package_name}}.testing"  
+        icon: "assets/envs/testing/app-icon.png"
         adaptiveIcon:
-          foreground: "assets/envs/test/app-icon-foreground.png"
-          background: "assets/envs/test/app-icon-background.png"
+          foreground: "assets/envs/testing/app-icon-foreground.png"
+          background: "assets/envs/testing/app-icon-background.png"
       ios:
-        bundleId: "{{ios_bundle_id}}.test"
-        icon: "assets/envs/test/app-icon.png"
+        bundleId: "{{ios_bundle_id}}.testing"
+        icon: "assets/envs/testing/app-icon.png"
       macos:
-        bundleId: "{{ios_bundle_id}}.test"
-        icon: "assets/envs/test/app-icon.png"{{/has_testing_env}}
+        bundleId: "{{ios_bundle_id}}.testing"
+        icon: "assets/envs/testing/app-icon.png"{{/has_testing_env}}
     {{#has_prod_env}}prod:
       app:
         name: "{{project_name.titleCase()}}"

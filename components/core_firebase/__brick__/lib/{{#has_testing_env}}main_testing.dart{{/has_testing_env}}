@@ -1,4 +1,4 @@
-import 'package:{{project_name.snakeCase()}}/firebase_options_test.dart';
+import 'package:{{project_name.snakeCase()}}/firebase_options_testing.dart';
 import 'package:{{project_name.snakeCase()}}/flavors.dart';
 
 import 'main.dart';
