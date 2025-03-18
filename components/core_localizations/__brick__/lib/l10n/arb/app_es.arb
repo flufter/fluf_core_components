@@ -1,0 +1,67 @@
+{
+  "@@locale": "es",
+  "counterAppBarTitle": "Codika App",
+  "@counterAppBarTitle": {
+    "description": "Texto mostrado en la AppBar de la página del contador"
+  },
+  "youHavePushedTheButtonThisManyTimes": "Has pulsado el botón este número de veces:",
+  "@youHavePushedTheButtonThisManyTimes": {
+    "description": "Texto mostrado en la página del contador"
+  },
+  "hello": "Hola {userName}",
+  "@hello": {
+    "description": "Un mensaje con un solo parámetro",
+    "placeholders": {
+      "userName": {
+        "type": "String",
+        "example": "Bob"
+      }
+    }
+  },
+  "nWombats": "{count, plural, =0{ningún wombat} =1{1 wombat} other{{count} wombats}}",
+  "@nWombats": {
+    "description": "Un mensaje plural",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "pronoun": "{gender, select, male{él} female{ella} other{elle}}",
+  "@pronoun": {
+    "description": "Un mensaje con género",
+    "placeholders": {
+      "gender": {
+        "type": "String"
+      }
+    }
+  },
+  "numberOfDataPoints": "Número de puntos de datos: {value}",
+  "@numberOfDataPoints": {
+    "description": "Un mensaje con un parámetro int formateado",
+    "placeholders": {
+      "value": {
+        "type": "int",
+        "format": "compactCurrency",
+        "optionalParameters": {
+          "decimalDigits": 2
+        }
+      }
+    }
+  },
+  "helloWorldOn": "Hola Mundo el {date}",
+  "@helloWorldOn": {
+    "description": "Un mensaje con un parámetro de fecha",
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMd"
+      }
+    }
+  },
+  "escapedExample": "¡Hola! '{¿No es}' un día maravilloso?",
+  "@escapedExample": {
+    "description": "Un ejemplo de texto escapado con comillas simples"
+  }
+}
