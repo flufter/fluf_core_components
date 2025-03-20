@@ -1,53 +1,4 @@
-import 'dart:ui';
-
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
-
-Future<void> runMainApp({
-  required FirebaseOptions firebaseOptions,
-}) async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  await Firebase.initializeApp(options: firebaseOptions);
-
-  ErrorWidget.builder = errorBuilderWidget;
-
-  FlutterError.onError = (details) {
-    FirebaseCrashlytics.instance.recordFlutterFatalError(details);
-  };
-
-  PlatformDispatcher.instance.onError = (error, stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    return true;
-  };
-
-  runApp(const MyApp());
-}
-
-Widget errorBuilderWidget(FlutterErrorDetails details) {
-  return Material(
-    child: Container(
-      color: Colors.grey,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              const Text(
-                "An Error Was Encountered",
-              ),
-              const SizedBox(height: 32),
-              Text(
-                details.exception.toString(),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
-}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -56,7 +7,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter With Codika',
+      title: '{{project_name.titleCase()}}',
       theme: ThemeData(
         // This is the theme of your application.
         //

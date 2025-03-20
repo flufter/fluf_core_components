@@ -8,7 +8,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: context.l10n.counterAppBarTitle,
+      title: '{{project_name.titleCase()}}',
       theme: ThemeData(
         // This is the theme of your application.
         //
