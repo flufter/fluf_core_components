@@ -203,7 +203,7 @@ definitions:
         name: Setup Android Local Properties
         script: | 
           echo "flutter.sdk=$HOME/programs/flutter" > "$CM_BUILD_DIR/android/local.properties"
-    - &font_build_awesome
+    - &build_font_awesome
         name: Build Font Awesome Icons
         script: | 
           # Store the current directory
@@ -259,7 +259,7 @@ definitions:
           echo "Building App Version: $PUBSPEC_MAJOR.$PUBSPEC_MINOR.$PUBSPEC_PATCH+$PUBSPEC_BUILD_NUMBER"
 
           # Build the Flutter app with semantic versioning
-          shorebird release ios --flavor $ENV --flutter-version=3.27.2 -- \
+          shorebird release ios --flavor $ENV --flutter-version={{flutter_version}} -- \
             -t lib/main_${ENV}.dart \
             --flavor $ENV \
             --build-name=$PUBSPEC_MAJOR.$PUBSPEC_MINOR.$PUBSPEC_PATCH \
@@ -305,46 +305,80 @@ definitions:
             --release-version "$PATCH_RELEASE_VERSION" \
             --allow-asset-diffs -- \
             --export-options-plist=/Users/builder/export_options.plist
-    - &android_build_aab_prod
-        name: Build Android Production Bundle
+    - &android_build
+        name: Build Android
         script: |
-          echo "Fetching latest build version from Google Play Store"
-          LATEST_GOOGLE_PLAY_STORE_BUILD_VERSION=$(google-play get-latest-build-number --package-name "$PACKAGE_NAME" --tracks="$GOOGLE_PLAY_TRACK")
-          if [ -z $LATEST_GOOGLE_PLAY_STORE_BUILD_VERSION ]
-            then
-              # Fallback in case no build version was found at Firebase.
-              # BUILD_NUMBER is a Codemagic built-in variable tracking the number of
-              # times this workflow has been built
-              UPDATED_BUILD_VERSION=$BUILD_NUMBER
-              echo "No build version found at Google Play Store. Using build number $UPDATED_BUILD_VERSION"
-            else
-              UPDATED_BUILD_VERSION=$(($LATEST_GOOGLE_PLAY_STORE_BUILD_VERSION + 1))
-              echo "Latest build version found at Google Play Store: $LATEST_GOOGLE_PLAY_STORE_BUILD_VERSION. Using build number $UPDATED_BUILD_VERSION"
+          # Check if required version variables are set
+          REQUIRED_VARS=(
+            "PUBSPEC_MAJOR"
+            "PUBSPEC_MINOR"
+            "PUBSPEC_PATCH"
+            "PUBSPEC_BUILD_NUMBER"
+          )
+          
+          for VAR in "${REQUIRED_VARS[@]}"; do
+            if [ -z "${!VAR}" ]; then
+              echo "Error: $VAR is not set. Make sure version determination scripts were executed first."
+              exit 1
+            fi
+          done
+
+          echo "Building App Version: $PUBSPEC_MAJOR.$PUBSPEC_MINOR.$PUBSPEC_PATCH+$PUBSPEC_BUILD_NUMBER"
+
+          # Build the Flutter app with semantic versioning
+          shorebird release android --flavor $ENV --flutter-version={{flutter_version}} -- \
+            -t lib/main_${ENV}.dart \
+            --flavor $ENV \
+            --build-name=$PUBSPEC_MAJOR.$PUBSPEC_MINOR.$PUBSPEC_PATCH \
+            --build-number=$PUBSPEC_BUILD_NUMBER \
+            --dart-define-from-file=.codika/config/$ENV/.env
+
+          # Capture the exit status of the flutter build command
+          FLUTTER_BUILD_STATUS=$?
+
+          if [ $FLUTTER_BUILD_STATUS -ne 0 ]; then
+            echo "Flutter build failed with exit status $FLUTTER_BUILD_STATUS"
+            exit $FLUTTER_BUILD_STATUS
+          else
+            echo "Flutter build succeeded"
           fi
-          flutter build appbundle --release \
-            --build-name=1.0.$UPDATED_BUILD_VERSION \
-            --build-number=$UPDATED_BUILD_VERSION \
-            --dart-define-from-file=.codika/config/.env
-    - &android_build_apk_prod
-        name: Build Android Production APK
-        script: | 
-          echo "Fetching latest build version from Google Play Store"
-          LATEST_GOOGLE_PLAY_STORE_BUILD_VERSION=$(google-play get-latest-build-number --package-name "$PACKAGE_NAME" --tracks="$GOOGLE_PLAY_TRACK")
-          if [ -z $LATEST_GOOGLE_PLAY_STORE_BUILD_VERSION ]
-            then
-              # Fallback in case no build version was found at Firebase.
-              # BUILD_NUMBER is a Codemagic built-in variable tracking the number of
-              # times this workflow has been built
-              UPDATED_BUILD_VERSION=$BUILD_NUMBER
-              echo "No build version found at Google Play Store. Using build number $UPDATED_BUILD_VERSION"
-            else
-              UPDATED_BUILD_VERSION=$(($LATEST_GOOGLE_PLAY_STORE_BUILD_VERSION + 1))
-              echo "Latest build version found at Google Play Store: $LATEST_GOOGLE_PLAY_STORE_BUILD_VERSION. Using build number $UPDATED_BUILD_VERSION"
+    - &android_patch
+        name: Patch Android
+        script: |
+          # Check if required version variables are set
+          REQUIRED_VARS=(
+            "PUBSPEC_MAJOR"
+            "PUBSPEC_MINOR"
+            "PUBSPEC_PATCH"
+            "PUBSPEC_BUILD_NUMBER"
+          )
+          
+          for VAR in "${REQUIRED_VARS[@]}"; do
+            if [ -z "${!VAR}" ]; then
+              echo "Error: $VAR is not set. Make sure version determination scripts were executed first."
+              exit 1
+            fi
+          done
+
+          echo "Building Patch for version: $PUBSPEC_MAJOR.$PUBSPEC_MINOR.$PUBSPEC_PATCH+$PUBSPEC_BUILD_NUMBER"
+
+          PATCH_RELEASE_VERSION="$PUBSPEC_MAJOR.$PUBSPEC_MINOR.$PUBSPEC_PATCH+$PUBSPEC_BUILD_NUMBER"
+
+          # Build the Flutter app patch with semantic versioning
+          shorebird patch android --flavor $ENV \
+            -t lib/main_${ENV}.dart \
+            --flavor $ENV \
+            --release-version "$PATCH_RELEASE_VERSION"
+
+          # Capture the exit status of the flutter build command
+          FLUTTER_BUILD_STATUS=$?
+
+          if [ $FLUTTER_BUILD_STATUS -ne 0 ]; then
+            echo "Flutter patch failed with exit status $FLUTTER_BUILD_STATUS"
+            exit $FLUTTER_BUILD_STATUS
+          else
+            echo "Flutter patch succeeded"
           fi
-          flutter build apk --release \
-            --build-name=1.0.$UPDATED_BUILD_VERSION \
-            --build-number=$UPDATED_BUILD_VERSION \
-            --dart-define-from-file=.codika/config/.env
     - &crash_upload_dsym
         name: Upload dSYM to Crashlytics
         script: | 
@@ -440,8 +474,6 @@ workflows:
         - pattern: 'release/v+([0-9]).+([0-9]).+([0-9])-prod'
           include: true
           source: true
-    when:
-      condition: env.CM_COMMIT_MESSAGE contains "first-push
     cache:
       cache_paths:
         - $FLUTTER_ROOT/.pub-cache
@@ -457,7 +489,7 @@ workflows:
       - *signing_setup_xcode
       - *deps_get_flutter
       - *deps_install_pods
-      - *font_build_awesome
+      - *build_font_awesome
       - *ios_build
       - *crash_upload_dsym
     artifacts:
@@ -518,8 +550,90 @@ workflows:
       - *signing_setup_xcode
       - *deps_get_flutter
       - *deps_install_pods
-      - *font_build_awesome
+      - *build_font_awesome
       - *ios_patch
+  android-prod:
+    name: Prod Android (build)
+    <<: *server_instance
+    environment:
+      <<: *env_versions
+      android_signing:
+        - {{android_signing_key_codemagic_name}}
+      vars:
+        GOOGLE_PLAY_TRACK: internal
+        ENV: prod
+      groups:
+        - config_vars_prod
+        - google_credentials
+        - shorebird
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: 'release/v+([0-9]).+([0-9]).+([0-9])-prod'
+          include: true
+          source: true
+    cache:
+      cache_paths:
+        - $FLUTTER_ROOT/.pub-cache
+        - $HOME/.gradle/caches
+    scripts:
+      - *is_regular_build
+      - *get_version_from_pubspec
+      - *tools_install_flutterfire
+      - *tools_verify_flutterfire
+      - *tools_install_shorebird
+      - *config_copy_files
+      - *deps_setup_local_properties
+      - *deps_get_flutter
+      - *font_build_awesome
+      - *android_build
+    artifacts:
+      - build/**/outputs/**/*.aab
+      - build/**/outputs/**/mapping.txt
+      - flutter_drive.log
+    publishing:
+      << : *email_build_status
+      google_play:
+        credentials: $GOOGLE_PLAY_SERVICE_ACCOUNT
+        track: $GOOGLE_PLAY_TRACK
+        submit_as_draft: true
+  android-prod-patch:
+    name: Prod Android (patch)
+    <<: *server_instance
+    environment:
+      <<: *env_versions
+      android_signing:
+        - {{android_signing_key_codemagic_name}}
+      vars:
+        GOOGLE_PLAY_TRACK: internal
+        ENV: prod
+      groups:
+        - config_vars_prod
+        - google_credentials
+        - shorebird
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: 'release/v+([0-9]).+([0-9]).+([0-9])-prod-patch'
+          include: true
+          source: true
+    cache:
+      cache_paths:
+        - $FLUTTER_ROOT/.pub-cache
+        - $HOME/.gradle/caches
+    scripts:
+      - *is_patch_build
+      - *get_version_from_pubspec
+      - *tools_install_flutterfire
+      - *tools_verify_flutterfire
+      - *tools_install_shorebird
+      - *config_copy_files
+      - *deps_setup_local_properties
+      - *deps_get_flutter
+      - *font_build_awesome
+      - *android_patch
   {{/has_prod_env}}
   {{#has_stag_env}}
   ios-stag:
@@ -563,7 +677,7 @@ workflows:
       - *signing_setup_xcode
       - *deps_get_flutter
       - *deps_install_pods
-      - *font_build_awesome
+      - *build_font_awesome
       - *ios_build
       - *crash_upload_dsym
     artifacts:
@@ -624,8 +738,90 @@ workflows:
       - *signing_setup_xcode
       - *deps_get_flutter
       - *deps_install_pods
-      - *font_build_awesome
+      - *build_font_awesome
       - *ios_patch
+  android-stag:
+    name: Staging Android (build)
+    <<: *server_instance
+    environment:
+      <<: *env_versions
+      android_signing:
+        - {{android_signing_key_codemagic_name}}
+      vars:
+        GOOGLE_PLAY_TRACK: internal
+        ENV: stag
+      groups:
+        - config_vars_stag
+        - google_credentials
+        - shorebird
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: 'release/v+([0-9]).+([0-9]).+([0-9])-stag'
+          include: true
+          source: true
+    cache:
+      cache_paths:
+        - $FLUTTER_ROOT/.pub-cache
+        - $HOME/.gradle/caches
+    scripts:
+      - *is_regular_build
+      - *get_version_from_pubspec
+      - *tools_install_flutterfire
+      - *tools_verify_flutterfire
+      - *tools_install_shorebird
+      - *config_copy_files
+      - *deps_setup_local_properties
+      - *deps_get_flutter
+      - *font_build_awesome
+      - *android_build
+    artifacts:
+      - build/**/outputs/**/*.aab
+      - build/**/outputs/**/mapping.txt
+      - flutter_drive.log
+    publishing:
+      << : *email_build_status
+      google_play:
+        credentials: $GOOGLE_PLAY_SERVICE_ACCOUNT
+        track: $GOOGLE_PLAY_TRACK
+        submit_as_draft: true
+  android-stag-patch:
+    name: Staging Android (patch)
+    <<: *server_instance
+    environment:
+      <<: *env_versions
+      android_signing:
+        - {{android_signing_key_codemagic_name}}
+      vars:
+        GOOGLE_PLAY_TRACK: internal
+        ENV: stag
+      groups:
+        - config_vars_stag
+        - google_credentials
+        - shorebird
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: 'release/v+([0-9]).+([0-9]).+([0-9])-stag-patch'
+          include: true
+          source: true
+    cache:
+      cache_paths:
+        - $FLUTTER_ROOT/.pub-cache
+        - $HOME/.gradle/caches
+    scripts:
+      - *is_patch_build
+      - *get_version_from_pubspec
+      - *tools_install_flutterfire
+      - *tools_verify_flutterfire
+      - *tools_install_shorebird
+      - *config_copy_files
+      - *deps_setup_local_properties
+      - *deps_get_flutter
+      - *font_build_awesome
+      - *android_patch
   {{/has_stag_env}}
   {{#has_testing_env}}
   ios-testing:
@@ -669,7 +865,7 @@ workflows:
       - *signing_setup_xcode
       - *deps_get_flutter
       - *deps_install_pods
-      - *font_build_awesome
+      - *build_font_awesome
       - *ios_build
       - *crash_upload_dsym
     artifacts:
@@ -730,46 +926,88 @@ workflows:
       - *signing_setup_xcode
       - *deps_get_flutter
       - *deps_install_pods
-      - *font_build_awesome
+      - *build_font_awesome
       - *ios_patch
+  android-testing:
+    name: Testing Android (build)
+    <<: *server_instance
+    environment:
+      <<: *env_versions
+      android_signing:
+        - {{android_signing_key_codemagic_name}}
+      vars:
+        GOOGLE_PLAY_TRACK: internal
+        ENV: testing
+      groups:
+        - config_vars_testing
+        - google_credentials
+        - shorebird
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: 'release/v+([0-9]).+([0-9]).+([0-9])-testing'
+          include: true
+          source: true
+    cache:
+      cache_paths:
+        - $FLUTTER_ROOT/.pub-cache
+        - $HOME/.gradle/caches
+    scripts:
+      - *is_regular_build
+      - *get_version_from_pubspec
+      - *tools_install_flutterfire
+      - *tools_verify_flutterfire
+      - *tools_install_shorebird
+      - *config_copy_files
+      - *deps_setup_local_properties
+      - *deps_get_flutter
+      - *font_build_awesome
+      - *android_build
+    artifacts:
+      - build/**/outputs/**/*.aab
+      - build/**/outputs/**/mapping.txt
+      - flutter_drive.log
+    publishing:
+      << : *email_build_status
+      google_play:
+        credentials: $GOOGLE_PLAY_SERVICE_ACCOUNT
+        track: $GOOGLE_PLAY_TRACK
+        submit_as_draft: true
+  android-testing-patch:
+    name: Testing Android (patch)
+    <<: *server_instance
+    environment:
+      <<: *env_versions
+      android_signing:
+        - {{android_signing_key_codemagic_name}}
+      vars:
+        GOOGLE_PLAY_TRACK: internal
+        ENV: testing
+      groups:
+        - config_vars_testing
+        - google_credentials
+        - shorebird
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: 'release/v+([0-9]).+([0-9]).+([0-9])-testing-patch'
+          include: true
+          source: true
+    cache:
+      cache_paths:
+        - $FLUTTER_ROOT/.pub-cache
+        - $HOME/.gradle/caches
+    scripts:
+      - *is_patch_build
+      - *get_version_from_pubspec
+      - *tools_install_flutterfire
+      - *tools_verify_flutterfire
+      - *tools_install_shorebird
+      - *config_copy_files
+      - *deps_setup_local_properties
+      - *deps_get_flutter
+      - *font_build_awesome
+      - *android_patch
   {{/has_testing_env}}
-  # android-prod:
-  #   name: Prod Android
-  #   instance_type: mac_mini_m1
-  #   max_build_duration: 60
-  #   environment:
-  #     java : 17
-  #     flutter: stable
-  #     xcode: latest
-  #     android_signing:
-  #       - {{android_signing_key_codemagic_name}}
-  #     groups:
-  #       - config_vars_prod
-  #       - google_credentials
-  #     vars:
-  #       GOOGLE_PLAY_TRACK: internal
-  #   triggering:
-  #     events:
-  #       - push
-  #     branch_patterns:
-  #       - pattern: 'prod'
-  #         include: true
-  #         source: true
-  #   cache:
-  #     cache_paths:
-  #       - $FLUTTER_ROOT/.pub-cache
-  #       - $HOME/.gradle/caches
-  #   scripts:
-  #     - *copying_config_files_prod
-  #     - *setup_local_properties
-  #     - *get_flutter_packages
-  #     - *build_font_awesome_icons
-  #     - *build_aab_prod
-  #     # - *build_apk_prod
-  #   << : *android_artifacts
-  #   publishing:
-  #     << : *email_build_status
-  #     google_play:
-  #       credentials: $GOOGLE_PLAY_SERVICE_ACCOUNT
-  #       track: $GOOGLE_PLAY_TRACK
-  #       submit_as_draft: true
