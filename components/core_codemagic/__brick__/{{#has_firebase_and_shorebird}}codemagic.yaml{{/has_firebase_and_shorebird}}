@@ -195,6 +195,7 @@ definitions:
         name: Get Flutter Dependencies
         script: | 
           flutter pub get
+          flutter pub run build_runner build --delete-conflicting-outputs
     - &deps_install_pods
         name: Install CocoaPods Dependencies
         script: | 
@@ -586,7 +587,7 @@ workflows:
       - *config_copy_files
       - *deps_setup_local_properties
       - *deps_get_flutter
-      - *font_build_awesome
+      - *build_font_awesome
       - *android_build
     artifacts:
       - build/**/outputs/**/*.aab
@@ -632,7 +633,7 @@ workflows:
       - *config_copy_files
       - *deps_setup_local_properties
       - *deps_get_flutter
-      - *font_build_awesome
+      - *build_font_awesome
       - *android_patch
   {{/has_prod_env}}
   {{#has_stag_env}}
@@ -774,7 +775,7 @@ workflows:
       - *config_copy_files
       - *deps_setup_local_properties
       - *deps_get_flutter
-      - *font_build_awesome
+      - *build_font_awesome
       - *android_build
     artifacts:
       - build/**/outputs/**/*.aab
@@ -820,7 +821,7 @@ workflows:
       - *config_copy_files
       - *deps_setup_local_properties
       - *deps_get_flutter
-      - *font_build_awesome
+      - *build_font_awesome
       - *android_patch
   {{/has_stag_env}}
   {{#has_testing_env}}
@@ -962,7 +963,7 @@ workflows:
       - *config_copy_files
       - *deps_setup_local_properties
       - *deps_get_flutter
-      - *font_build_awesome
+      - *build_font_awesome
       - *android_build
     artifacts:
       - build/**/outputs/**/*.aab
@@ -1008,6 +1009,6 @@ workflows:
       - *config_copy_files
       - *deps_setup_local_properties
       - *deps_get_flutter
-      - *font_build_awesome
+      - *build_font_awesome
       - *android_patch
   {{/has_testing_env}}
