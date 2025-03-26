@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:{{project_name.snakeCase()}}/app.dart';
+{{#has_core_splash_screen}}import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:flutter/services.dart';{{/has_core_splash_screen}}
 
 Future<void> runMainApp() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  {{#has_core_splash_screen}}FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.manual,
+    overlays: [SystemUiOverlay.bottom, SystemUiOverlay.top],
+  );{{/has_core_splash_screen}}
+  
   ErrorWidget.builder = errorBuilderWidget;
+
+  // Add your initialization code here
+
+  {{#has_core_splash_screen}}FlutterNativeSplash.remove();{{/has_core_splash_screen}}
 
   runApp(const MyApp());
 }

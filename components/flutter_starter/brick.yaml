@@ -30,3 +30,8 @@ vars:
     description: Whether the project has firebase
     default: false
     prompt: Does the project have firebase?
+  has_core_splash_screen:
+    type: boolean
+    description: Whether the project has firebase
+    default: false
+    prompt: Does the project have firebase?
