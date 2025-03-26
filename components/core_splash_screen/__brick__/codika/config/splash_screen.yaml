@@ -2,32 +2,56 @@ flutter_native_splash:
   android: true
   ios: true
   web: true
+  fullscreen: true
+  # branding_bottom_padding: 24
 
-  color: "#fdfdf8"
-  color_dark: "#111111"
-
+  # color: "#F8F1FC"
   image: "assets/images/splash_screen/logo_light.png"
-  # background_image: "assets/images/splash_screen/background.png"
-  branding: "assets/images/splash_screen/branding_light.png"
+  image_android: "assets/images/splash_screen/android_logo_light.png"
+  image_ios: "assets/images/splash_screen/ios_logo_light.png"
+  background_image: "assets/images/splash_screen/background_light.png"
+  # branding: "assets/images/splash_screen/branding_light.png"
 
+  # color_dark: "#F8F1FC"
   image_dark: "assets/images/splash_screen/logo_dark.png"
-  # background_image_dark: "assets/images/splash_screen/background.png"
-  branding_dark: "assets/images/splash_screen/branding_dark.png"
+  image_dark_android: "assets/images/splash_screen/android_logo_dark.png"
+  image_dark_ios: "assets/images/splash_screen/ios_logo_dark.png"
+  background_image_dark: "assets/images/splash_screen/background_dark.png"
+  # branding_dark: "assets/images/splash_screen/branding_dark.png"
 
   android_12: 
-    color: "#fdfdf8"
-    image: "assets/images/splash_screen/logo_light.png"
-    branding: "assets/images/splash_screen/branding_light.png"
+    # Background image is not supported for Android 12
 
-    color_dark: "#111111"
-    image_dark: "assets/images/splash_screen/logo_light.png"
-    branding_dark: "assets/images/splash_screen/branding_light.png"
+    color: "#F8F1FC"
+    image: "assets/images/splash_screen/android_12_logo_light.png"
+    # branding: "assets/images/splash_screen/branding_light.png"
+
+    color_dark: "#1E1432"
+    image_dark: "assets/images/splash_screen/android_12_logo_dark.png"
+    # branding_dark: "assets/images/splash_screen/branding_dark.png"
 
 # REQUIREMENTS:
-# All images should be png
-# 1. For iOS and Android
-#     - the background image must be 1290px x 2796px
-#     - the logo image must be 600px x 600px
-#     - the branding image must be 750px x 750px and should contain 100px of padding top and bottom.
-# 2. For Android 12, the logo image must be 1152px x 1152px, but the logo should be contained within a circle of diameter 768px in the center of the image.
+# All images should be png (GIF is only supported for web)
+# 1. For iOS and Android (non-Android 12):
+#    - Logo image: should be sized for 4x pixel density, recommended 600px x 600px
+#    - Background image: full screen image that will be stretched to fit the screen
+#    - Branding image: recommended 750px x 750px with appropriate padding
+#
+# 2. For Android 12+:
+#    - Logo image without icon background: should be 1152×1152px, and fit within a circle
+#      768px in diameter at the center of the canvas
+#    - Logo image with icon background: should be 960×960px, and fit within a circle
+#      640px in diameter
+#    - Note: Android 12 splash screens don't support background images, only solid colors
+#
+# 3. Image positioning:
+#    - Android: Use android_gravity parameter to control positioning
+#    - iOS: Use ios_content_mode parameter to control positioning
+#    - Web: Use web_image_mode parameter (center, contain, stretch, or cover)
+#
+# 4. Tips:
+#    - To keep splash screen during app initialization, use FlutterNativeSplash.preserve()
+#      and FlutterNativeSplash.remove() in your Flutter code
+#    - For dark mode, provide separate image assets with _dark suffix
+#    - Test on physical devices as emulators may not display splash screen correctly
 #

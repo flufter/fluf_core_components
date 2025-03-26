@@ -7,58 +7,62 @@ flavors:
       name: "{{project_name.titleCase()}} Dev"
     android:
       applicationId: "{{android_package_name}}.dev"
-      icon: "assets/envs/dev/app-icon.png"
-      adaptiveIcon:
-        foreground: "assets/envs/dev/app-icon-foreground.png"
-        background: "assets/envs/dev/app-icon-background.png"
+      # icon: "assets/envs/dev/app-icon.png"
+      # adaptiveIcon:
+      #   foreground: "assets/envs/dev/app-icon-foreground.png"
+      #   background: "assets/envs/dev/app-icon-background.png"
     ios:
       bundleId: "{{ios_bundle_id}}.dev"
-      icon: "assets/envs/dev/app-icon.png"
+      # icon: "assets/envs/dev/app-icon.png"
     macos:
       bundleId: "{{ios_bundle_id}}.dev"
-      icon: "assets/envs/dev/app-icon.png"{{/has_dev_env}}
+      # icon: "assets/envs/dev/app-icon.png"
+  {{/has_dev_env}}
   {{#has_stag_env}}stag:
     app:
       name: "{{project_name.titleCase()}} Stag"
     android:
       applicationId: "{{android_package_name}}.stag"  
-      icon: "assets/envs/stag/app-icon.png"
-      adaptiveIcon:
-        foreground: "assets/envs/stag/app-icon-foreground.png"
-        background: "assets/envs/stag/app-icon-background.png"
+      # icon: "assets/envs/stag/app-icon.png"
+      # adaptiveIcon:
+      #   foreground: "assets/envs/stag/app-icon-foreground.png"
+      #   background: "assets/envs/stag/app-icon-background.png"
     ios:
       bundleId: "{{ios_bundle_id}}.stag"
-      icon: "assets/envs/stag/app-icon.png"
+      # icon: "assets/envs/stag/app-icon.png"
     macos:
       bundleId: "{{ios_bundle_id}}.stag"
-      icon: "assets/envs/stag/app-icon.png"{{/has_stag_env}}
+      # icon: "assets/envs/stag/app-icon.png"
+  {{/has_stag_env}}
   {{#has_testing_env}}testing:
     app:
       name: "{{project_name.titleCase()}} Testing"
     android:
       applicationId: "{{android_package_name}}.testing"  
-      icon: "assets/envs/testing/app-icon.png"
-      adaptiveIcon:
-        foreground: "assets/envs/testing/app-icon-foreground.png"
-        background: "assets/envs/testing/app-icon-background.png"
+      # icon: "assets/envs/testing/app-icon.png"
+      # adaptiveIcon:
+      #   foreground: "assets/envs/testing/app-icon-foreground.png"
+      #   background: "assets/envs/testing/app-icon-background.png"
     ios:
       bundleId: "{{ios_bundle_id}}.testing"
-      icon: "assets/envs/testing/app-icon.png"
+      # icon: "assets/envs/testing/app-icon.png"
     macos:
       bundleId: "{{ios_bundle_id}}.testing"
-      icon: "assets/envs/testing/app-icon.png"{{/has_testing_env}}
+      # icon: "assets/envs/testing/app-icon.png"
+  {{/has_testing_env}}
   {{#has_prod_env}}prod:
     app:
       name: "{{project_name.titleCase()}}"
     android:
       applicationId: "{{android_package_name}}"  
-      icon: "assets/envs/prod/app-icon.png"
-      adaptiveIcon:
-        foreground: "assets/envs/prod/app-icon-foreground.png"
-        background: "assets/envs/prod/app-icon-background.png"
+      # icon: "assets/envs/prod/app-icon.png"
+      # adaptiveIcon:
+      #   foreground: "assets/envs/prod/app-icon-foreground.png"
+      #   background: "assets/envs/prod/app-icon-background.png"
     ios:
       bundleId: "{{ios_bundle_id}}"
-      icon: "assets/envs/prod/app-icon.png"
+      # icon: "assets/envs/prod/app-icon.png"
     macos:
       bundleId: "{{ios_bundle_id}}"
-      icon: "assets/envs/prod/app-icon.png"{{/has_prod_env}}
+      # icon: "assets/envs/prod/app-icon.png"
+    {{/has_prod_env}}
