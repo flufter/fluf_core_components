@@ -1,11 +1,12 @@
 {
-  "version": "0.3.8",
-  "created_at": "2025-03-12T13:58:38 UTC",
+  "version": "0.4.2",
+  "created_at": "2025-03-27T20:06:37 UTC",
   "components": [
     "core_app_icon",
     "core_codemagic",
     "core_firebase",
     "core_flavors",
+    "core_localizations",
     "core_shorebird",
     "core_splash_screen",
     "flutter_starter"
