@@ -124,16 +124,12 @@ definitions:
           
           # Add Shorebird to PATH
           echo PATH="/Users/builder/.shorebird/bin:$PATH" >> $CM_ENV
-    - &config_copy_files
+    - &copy_config_file_env_vars
         name: Copy Configuration Files
         script: |
           # Create all necessary directories first
-          echo "Creating required directories..."
+          echo "Creating required directory..."
           mkdir -p "$FCI_BUILD_DIR/.codika/config/$ENV"
-          mkdir -p "$FCI_BUILD_DIR/lib"
-          mkdir -p "$FCI_BUILD_DIR/ios/flavors/$ENV"
-          mkdir -p "$FCI_BUILD_DIR/android/app/src/$ENV"
-          mkdir -p "$FCI_BUILD_DIR/macos/flavors/$ENV"
           
           # Environment Keys
           if [ -z "$ENV_VARS_KEYS" ]; then
@@ -142,7 +138,16 @@ definitions:
             echo $ENV_VARS_KEYS | base64 --decode > "$FCI_BUILD_DIR/.codika/config/$ENV/.env"
             echo " - Environment Keys File Copied at $FCI_BUILD_DIR/.codika/config/$ENV/.env"
           fi
-
+    - &copy_config_files_firebase
+        name: Copy Configuration Files For Firebase
+        script: |
+          # Create all necessary directories first
+          echo "Creating required directories..."
+          mkdir -p "$FCI_BUILD_DIR/lib"
+          mkdir -p "$FCI_BUILD_DIR/ios/flavors/$ENV"
+          mkdir -p "$FCI_BUILD_DIR/android/app/src/$ENV"
+          mkdir -p "$FCI_BUILD_DIR/macos/flavors/$ENV"
+          
           # Firebase Options
           if [ -z "$FIREBASE_OPTIONS" ]; then
             echo "ERROR: FIREBASE_OPTIONS is not set."
@@ -174,8 +179,6 @@ definitions:
             echo $GOOGLE_SERVICE_MACOS | base64 --decode > "$FCI_BUILD_DIR/macos/flavors/$ENV/GoogleService-Info.plist"
             echo " - MacOS Config File Copied"
           fi
-
-          echo PATH="/Users/builder/.shorebird/bin:$PATH" >> $CM_ENV
     - &signing_init_keychain
         name: Initialize Keychain
         script: keychain initialize
@@ -191,9 +194,10 @@ definitions:
     - &signing_setup_xcode
         name: Configure Xcode Signing
         script: xcode-project use-profiles
-    - &deps_get_flutter
-        name: Get Flutter Dependencies
+    - &flutter_clean_and_rebuild
+        name: Clean and Rebuild Flutter App
         script: | 
+          flutter clean
           flutter pub get
           flutter pub run build_runner build --delete-conflicting-outputs
     - &deps_install_pods
@@ -240,6 +244,44 @@ definitions:
             echo "Directory $DIR does not exist."
           fi
     - &ios_build
+        name: Build iOS IPA
+        script: |
+          # Check if required version variables are set
+          REQUIRED_VARS=(
+            "PUBSPEC_MAJOR"
+            "PUBSPEC_MINOR"
+            "PUBSPEC_PATCH"
+            "PUBSPEC_BUILD_NUMBER"
+          )
+          
+          for VAR in "${REQUIRED_VARS[@]}"; do
+            if [ -z "${!VAR}" ]; then
+              echo "Error: $VAR is not set. Make sure version determination scripts were executed first."
+              exit 1
+            fi
+          done
+
+          echo "Building App Version: $PUBSPEC_MAJOR.$PUBSPEC_MINOR.$PUBSPEC_PATCH+$PUBSPEC_BUILD_NUMBER"
+
+          # Build the Flutter app with semantic versioning
+          flutter build ipa --flavor $ENV \
+            -t lib/main_${ENV}.dart \
+            --flavor $ENV \
+            --build-name=$PUBSPEC_MAJOR.$PUBSPEC_MINOR.$PUBSPEC_PATCH \
+            --build-number=$PUBSPEC_BUILD_NUMBER \
+            --export-options-plist=/Users/builder/export_options.plist \
+            --dart-define-from-file=.codika/config/$ENV/.env
+
+          # Capture the exit status of the flutter build command
+          FLUTTER_BUILD_STATUS=$?
+
+          if [ $FLUTTER_BUILD_STATUS -ne 0 ]; then
+            echo "Flutter build failed with exit status $FLUTTER_BUILD_STATUS"
+            exit $FLUTTER_BUILD_STATUS
+          else
+            echo "Flutter build succeeded"
+          fi
+    - &ios_build_shorebird
         name: Build iOS IPA
         script: |
           # Check if required version variables are set
@@ -307,6 +349,43 @@ definitions:
             --allow-asset-diffs -- \
             --export-options-plist=/Users/builder/export_options.plist
     - &android_build
+        name: Build Android
+        script: |
+          # Check if required version variables are set
+          REQUIRED_VARS=(
+            "PUBSPEC_MAJOR"
+            "PUBSPEC_MINOR"
+            "PUBSPEC_PATCH"
+            "PUBSPEC_BUILD_NUMBER"
+          )
+          
+          for VAR in "${REQUIRED_VARS[@]}"; do
+            if [ -z "${!VAR}" ]; then
+              echo "Error: $VAR is not set. Make sure version determination scripts were executed first."
+              exit 1
+            fi
+          done
+
+          echo "Building App Version: $PUBSPEC_MAJOR.$PUBSPEC_MINOR.$PUBSPEC_PATCH+$PUBSPEC_BUILD_NUMBER"
+
+          # Build the Flutter app with semantic versioning
+          flutter build appbundle --flavor $ENV \
+            -t lib/main_${ENV}.dart \
+            --flavor $ENV \
+            --build-name=$PUBSPEC_MAJOR.$PUBSPEC_MINOR.$PUBSPEC_PATCH \
+            --build-number=$PUBSPEC_BUILD_NUMBER \
+            --dart-define-from-file=.codika/config/$ENV/.env
+
+          # Capture the exit status of the flutter build command
+          FLUTTER_BUILD_STATUS=$?
+
+          if [ $FLUTTER_BUILD_STATUS -ne 0 ]; then
+            echo "Flutter build failed with exit status $FLUTTER_BUILD_STATUS"
+            exit $FLUTTER_BUILD_STATUS
+          else
+            echo "Flutter build succeeded"
+          fi
+    - &android_build_shorebird
         name: Build Android
         script: |
           # Check if required version variables are set
@@ -467,7 +546,7 @@ workflows:
       groups:
         - config_vars_prod
         - code_signing
-        - shorebird
+        {{^has_core_shorebird}}- shorebird{{/has_core_shorebird}}
     triggering:
       events:
         - push
@@ -483,15 +562,17 @@ workflows:
       - *is_regular_build
       - *get_version_from_pubspec
       - *tools_install_flutterfire
-      - *tools_install_shorebird
-      - *config_copy_files
+      {{^has_core_firebase}}- *tools_install_shorebird{{/has_core_firebase}}
+      - *copy_config_file_env_vars
+      {{#has_core_firebase}}- *copy_config_files_firebase{{/has_core_firebase}}
       - *signing_init_keychain
       - *signing_add_certificates
       - *signing_setup_xcode
-      - *deps_get_flutter
+      - *flutter_clean_and_rebuild
       - *deps_install_pods
       - *build_font_awesome
-      - *ios_build
+      {{#has_core_shorebird}}- *ios_build_shorebird{{/has_core_shorebird}}
+      {{^has_core_shorebird}}- *ios_build{{/has_core_shorebird}}
       - *crash_upload_dsym
     artifacts:
       - build/ios/ipa/*.ipa
@@ -527,7 +608,7 @@ workflows:
       groups:
         - config_vars_prod
         - code_signing
-        - shorebird
+        {{^has_core_shorebird}}- shorebird{{/has_core_shorebird}}
     triggering:
       events:
         - push
@@ -544,12 +625,13 @@ workflows:
       - *get_version_from_pubspec
       - *tools_install_flutterfire
       - *tools_verify_flutterfire
-      - *tools_install_shorebird
-      - *config_copy_files
+      {{^has_core_firebase}}- *tools_install_shorebird{{/has_core_firebase}}
+      - *copy_config_file_env_vars
+      {{#has_core_firebase}}- *copy_config_files_firebase{{/has_core_firebase}}
       - *signing_init_keychain
       - *signing_add_certificates
       - *signing_setup_xcode
-      - *deps_get_flutter
+      - *flutter_clean_and_rebuild
       - *deps_install_pods
       - *build_font_awesome
       - *ios_patch
@@ -566,7 +648,7 @@ workflows:
       groups:
         - config_vars_prod
         - google_credentials
-        - shorebird
+        {{^has_core_shorebird}}- shorebird{{/has_core_shorebird}}
     triggering:
       events:
         - push
@@ -583,12 +665,13 @@ workflows:
       - *get_version_from_pubspec
       - *tools_install_flutterfire
       - *tools_verify_flutterfire
-      - *tools_install_shorebird
-      - *config_copy_files
+      {{^has_core_firebase}}- *tools_install_shorebird{{/has_core_firebase}}
+      - *copy_config_file_env_vars
+      {{#has_core_firebase}}- *copy_config_files_firebase{{/has_core_firebase}}
       - *deps_setup_local_properties
-      - *deps_get_flutter
+      - *flutter_clean_and_rebuild
       - *build_font_awesome
-      - *android_build
+      - *android_build_shorebird
     artifacts:
       - build/**/outputs/**/*.aab
       - build/**/outputs/**/mapping.txt
@@ -612,7 +695,7 @@ workflows:
       groups:
         - config_vars_prod
         - google_credentials
-        - shorebird
+        {{^has_core_shorebird}}- shorebird{{/has_core_shorebird}}
     triggering:
       events:
         - push
@@ -629,10 +712,11 @@ workflows:
       - *get_version_from_pubspec
       - *tools_install_flutterfire
       - *tools_verify_flutterfire
-      - *tools_install_shorebird
-      - *config_copy_files
+      {{^has_core_firebase}}- *tools_install_shorebird{{/has_core_firebase}}
+      - *copy_config_file_env_vars
+      {{#has_core_firebase}}- *copy_config_files_firebase{{/has_core_firebase}}
       - *deps_setup_local_properties
-      - *deps_get_flutter
+      - *flutter_clean_and_rebuild
       - *build_font_awesome
       - *android_patch
   {{/has_prod_env}}
@@ -655,7 +739,7 @@ workflows:
       groups:
         - config_vars_stag
         - code_signing
-        - shorebird
+        {{^has_core_shorebird}}- shorebird{{/has_core_shorebird}}
     triggering:
       events:
         - push
@@ -671,15 +755,17 @@ workflows:
       - *is_regular_build
       - *get_version_from_pubspec
       - *tools_install_flutterfire
-      - *tools_install_shorebird
-      - *config_copy_files
+      {{^has_core_firebase}}- *tools_install_shorebird{{/has_core_firebase}}
+      - *copy_config_file_env_vars
+      {{#has_core_firebase}}- *copy_config_files_firebase{{/has_core_firebase}}
       - *signing_init_keychain
       - *signing_add_certificates
       - *signing_setup_xcode
-      - *deps_get_flutter
+      - *flutter_clean_and_rebuild
       - *deps_install_pods
       - *build_font_awesome
-      - *ios_build
+      {{#has_core_shorebird}}- *ios_build_shorebird{{/has_core_shorebird}}
+      {{^has_core_shorebird}}- *ios_build{{/has_core_shorebird}}
       - *crash_upload_dsym
     artifacts:
       - build/ios/ipa/*.ipa
@@ -715,7 +801,7 @@ workflows:
       groups:
         - config_vars_stag
         - code_signing
-        - shorebird
+        {{^has_core_shorebird}}- shorebird{{/has_core_shorebird}}
     triggering:
       events:
         - push
@@ -732,12 +818,13 @@ workflows:
       - *get_version_from_pubspec
       - *tools_install_flutterfire
       - *tools_verify_flutterfire
-      - *tools_install_shorebird
-      - *config_copy_files
+      {{^has_core_firebase}}- *tools_install_shorebird{{/has_core_firebase}}
+      - *copy_config_file_env_vars
+      {{#has_core_firebase}}- *copy_config_files_firebase{{/has_core_firebase}}
       - *signing_init_keychain
       - *signing_add_certificates
       - *signing_setup_xcode
-      - *deps_get_flutter
+      - *flutter_clean_and_rebuild
       - *deps_install_pods
       - *build_font_awesome
       - *ios_patch
@@ -754,7 +841,7 @@ workflows:
       groups:
         - config_vars_stag
         - google_credentials
-        - shorebird
+        {{^has_core_shorebird}}- shorebird{{/has_core_shorebird}}
     triggering:
       events:
         - push
@@ -771,12 +858,13 @@ workflows:
       - *get_version_from_pubspec
       - *tools_install_flutterfire
       - *tools_verify_flutterfire
-      - *tools_install_shorebird
-      - *config_copy_files
+      {{^has_core_firebase}}- *tools_install_shorebird{{/has_core_firebase}}
+      - *copy_config_file_env_vars
+      {{#has_core_firebase}}- *copy_config_files_firebase{{/has_core_firebase}}
       - *deps_setup_local_properties
-      - *deps_get_flutter
+      - *flutter_clean_and_rebuild
       - *build_font_awesome
-      - *android_build
+      - *android_build_shorebird
     artifacts:
       - build/**/outputs/**/*.aab
       - build/**/outputs/**/mapping.txt
@@ -800,7 +888,7 @@ workflows:
       groups:
         - config_vars_stag
         - google_credentials
-        - shorebird
+        {{^has_core_shorebird}}- shorebird{{/has_core_shorebird}}
     triggering:
       events:
         - push
@@ -817,10 +905,11 @@ workflows:
       - *get_version_from_pubspec
       - *tools_install_flutterfire
       - *tools_verify_flutterfire
-      - *tools_install_shorebird
-      - *config_copy_files
+      {{^has_core_firebase}}- *tools_install_shorebird{{/has_core_firebase}}
+      - *copy_config_file_env_vars
+      {{#has_core_firebase}}- *copy_config_files_firebase{{/has_core_firebase}}
       - *deps_setup_local_properties
-      - *deps_get_flutter
+      - *flutter_clean_and_rebuild
       - *build_font_awesome
       - *android_patch
   {{/has_stag_env}}
@@ -843,7 +932,7 @@ workflows:
       groups:
         - config_vars_testing
         - code_signing
-        - shorebird
+        {{^has_core_shorebird}}- shorebird{{/has_core_shorebird}}
     triggering:
       events:
         - push
@@ -859,15 +948,17 @@ workflows:
       - *is_regular_build
       - *get_version_from_pubspec
       - *tools_install_flutterfire
-      - *tools_install_shorebird
-      - *config_copy_files
+      {{^has_core_firebase}}- *tools_install_shorebird{{/has_core_firebase}}
+      - *copy_config_file_env_vars
+      {{#has_core_firebase}}- *copy_config_files_firebase{{/has_core_firebase}}
       - *signing_init_keychain
       - *signing_add_certificates
       - *signing_setup_xcode
-      - *deps_get_flutter
+      - *flutter_clean_and_rebuild
       - *deps_install_pods
       - *build_font_awesome
-      - *ios_build
+      {{#has_core_shorebird}}- *ios_build_shorebird{{/has_core_shorebird}}
+      {{^has_core_shorebird}}- *ios_build{{/has_core_shorebird}}
       - *crash_upload_dsym
     artifacts:
       - build/ios/ipa/*.ipa
@@ -903,7 +994,7 @@ workflows:
       groups:
         - config_vars_testing
         - code_signing
-        - shorebird
+        {{^has_core_shorebird}}- shorebird{{/has_core_shorebird}}
     triggering:
       events:
         - push
@@ -920,12 +1011,13 @@ workflows:
       - *get_version_from_pubspec
       - *tools_install_flutterfire
       - *tools_verify_flutterfire
-      - *tools_install_shorebird
-      - *config_copy_files
+      {{^has_core_firebase}}- *tools_install_shorebird{{/has_core_firebase}}
+      - *copy_config_file_env_vars
+      {{#has_core_firebase}}- *copy_config_files_firebase{{/has_core_firebase}}
       - *signing_init_keychain
       - *signing_add_certificates
       - *signing_setup_xcode
-      - *deps_get_flutter
+      - *flutter_clean_and_rebuild
       - *deps_install_pods
       - *build_font_awesome
       - *ios_patch
@@ -942,7 +1034,7 @@ workflows:
       groups:
         - config_vars_testing
         - google_credentials
-        - shorebird
+        {{^has_core_shorebird}}- shorebird{{/has_core_shorebird}}
     triggering:
       events:
         - push
@@ -959,12 +1051,13 @@ workflows:
       - *get_version_from_pubspec
       - *tools_install_flutterfire
       - *tools_verify_flutterfire
-      - *tools_install_shorebird
-      - *config_copy_files
+      {{^has_core_firebase}}- *tools_install_shorebird{{/has_core_firebase}}
+      - *copy_config_file_env_vars
+      {{#has_core_firebase}}- *copy_config_files_firebase{{/has_core_firebase}}
       - *deps_setup_local_properties
-      - *deps_get_flutter
+      - *flutter_clean_and_rebuild
       - *build_font_awesome
-      - *android_build
+      - *android_build_shorebird
     artifacts:
       - build/**/outputs/**/*.aab
       - build/**/outputs/**/mapping.txt
@@ -988,7 +1081,7 @@ workflows:
       groups:
         - config_vars_testing
         - google_credentials
-        - shorebird
+        {{^has_core_shorebird}}- shorebird{{/has_core_shorebird}}
     triggering:
       events:
         - push
@@ -1005,10 +1098,11 @@ workflows:
       - *get_version_from_pubspec
       - *tools_install_flutterfire
       - *tools_verify_flutterfire
-      - *tools_install_shorebird
-      - *config_copy_files
+      {{^has_core_firebase}}- *tools_install_shorebird{{/has_core_firebase}}
+      - *copy_config_file_env_vars
+      {{#has_core_firebase}}- *copy_config_files_firebase{{/has_core_firebase}}
       - *deps_setup_local_properties
-      - *deps_get_flutter
+      - *flutter_clean_and_rebuild
       - *build_font_awesome
       - *android_patch
   {{/has_testing_env}}
