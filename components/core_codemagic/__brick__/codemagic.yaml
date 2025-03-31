@@ -562,9 +562,13 @@ workflows:
       - *is_regular_build
       - *get_version_from_pubspec
       - *tools_install_flutterfire
-      {{^has_core_firebase}}- *tools_install_shorebird{{/has_core_firebase}}
+      {{#has_core_shorebird}}- *tools_install_shorebird{{/has_core_shorebird}}
+      {{^has_core_shorebird}}# De-comment the line below if you want to use shorebird
+      # - *tools_install_shorebird{{/has_core_shorebird}}
       - *copy_config_file_env_vars
       {{#has_core_firebase}}- *copy_config_files_firebase{{/has_core_firebase}}
+      {{^has_core_firebase}}# De-comment the line below if your app uses firebase
+      # - *copy_config_files_firebase{{/has_core_firebase}}
       - *signing_init_keychain
       - *signing_add_certificates
       - *signing_setup_xcode
@@ -572,7 +576,9 @@ workflows:
       - *deps_install_pods
       - *build_font_awesome
       {{#has_core_shorebird}}- *ios_build_shorebird{{/has_core_shorebird}}
-      {{^has_core_shorebird}}- *ios_build{{/has_core_shorebird}}
+      {{^has_core_shorebird}}- *ios_build
+      # Replace line above by the line below if you want to use shorebird
+      # - *ios_build_shorebird{{/has_core_shorebird}}
       - *crash_upload_dsym
     artifacts:
       - build/ios/ipa/*.ipa
@@ -625,9 +631,13 @@ workflows:
       - *get_version_from_pubspec
       - *tools_install_flutterfire
       - *tools_verify_flutterfire
-      {{^has_core_firebase}}- *tools_install_shorebird{{/has_core_firebase}}
+      {{#has_core_shorebird}}- *tools_install_shorebird{{/has_core_shorebird}}
+      {{^has_core_shorebird}}# De-comment the line below if you want to use shorebird
+      # - *tools_install_shorebird{{/has_core_shorebird}}
       - *copy_config_file_env_vars
       {{#has_core_firebase}}- *copy_config_files_firebase{{/has_core_firebase}}
+      {{^has_core_firebase}}# De-comment the line below if your app uses firebase
+      # - *copy_config_files_firebase{{/has_core_firebase}}
       - *signing_init_keychain
       - *signing_add_certificates
       - *signing_setup_xcode
@@ -665,13 +675,20 @@ workflows:
       - *get_version_from_pubspec
       - *tools_install_flutterfire
       - *tools_verify_flutterfire
-      {{^has_core_firebase}}- *tools_install_shorebird{{/has_core_firebase}}
+      {{#has_core_shorebird}}- *tools_install_shorebird{{/has_core_shorebird}}
+      {{^has_core_shorebird}}# De-comment the line below if you want to use shorebird
+      # - *tools_install_shorebird{{/has_core_shorebird}}
       - *copy_config_file_env_vars
       {{#has_core_firebase}}- *copy_config_files_firebase{{/has_core_firebase}}
+      {{^has_core_firebase}}# De-comment the line below if your app uses firebase
+      # - *copy_config_files_firebase{{/has_core_firebase}}
       - *deps_setup_local_properties
       - *flutter_clean_and_rebuild
       - *build_font_awesome
-      - *android_build_shorebird
+      {{#has_core_shorebird}}- *android_build_shorebird{{/has_core_shorebird}}
+      {{^has_core_shorebird}}- *android_build
+      # Replace line above by the line below if you want to use shorebird
+      # - *android_build_shorebird{{/has_core_shorebird}}
     artifacts:
       - build/**/outputs/**/*.aab
       - build/**/outputs/**/mapping.txt
@@ -712,9 +729,13 @@ workflows:
       - *get_version_from_pubspec
       - *tools_install_flutterfire
       - *tools_verify_flutterfire
-      {{^has_core_firebase}}- *tools_install_shorebird{{/has_core_firebase}}
+      {{#has_core_shorebird}}- *tools_install_shorebird{{/has_core_shorebird}}
+      {{^has_core_shorebird}}# De-comment the line below if you want to use shorebird
+      # - *tools_install_shorebird{{/has_core_shorebird}}
       - *copy_config_file_env_vars
       {{#has_core_firebase}}- *copy_config_files_firebase{{/has_core_firebase}}
+      {{^has_core_firebase}}# De-comment the line below if your app uses firebase
+      # - *copy_config_files_firebase{{/has_core_firebase}}
       - *deps_setup_local_properties
       - *flutter_clean_and_rebuild
       - *build_font_awesome
@@ -755,9 +776,13 @@ workflows:
       - *is_regular_build
       - *get_version_from_pubspec
       - *tools_install_flutterfire
-      {{^has_core_firebase}}- *tools_install_shorebird{{/has_core_firebase}}
+      {{#has_core_shorebird}}- *tools_install_shorebird{{/has_core_shorebird}}
+      {{^has_core_shorebird}}# Decomment the line below if you want to use shorebird
+      # - *tools_install_shorebird{{/has_core_shorebird}}
       - *copy_config_file_env_vars
       {{#has_core_firebase}}- *copy_config_files_firebase{{/has_core_firebase}}
+      {{^has_core_firebase}}# De-comment the line below if your app uses firebase
+      # - *copy_config_files_firebase{{/has_core_firebase}}
       - *signing_init_keychain
       - *signing_add_certificates
       - *signing_setup_xcode
@@ -765,7 +790,9 @@ workflows:
       - *deps_install_pods
       - *build_font_awesome
       {{#has_core_shorebird}}- *ios_build_shorebird{{/has_core_shorebird}}
-      {{^has_core_shorebird}}- *ios_build{{/has_core_shorebird}}
+      {{^has_core_shorebird}}- *ios_build
+      # Replace line above by the line below if you want to use shorebird
+      # - *ios_build_shorebird{{/has_core_shorebird}}
       - *crash_upload_dsym
     artifacts:
       - build/ios/ipa/*.ipa
@@ -818,9 +845,13 @@ workflows:
       - *get_version_from_pubspec
       - *tools_install_flutterfire
       - *tools_verify_flutterfire
-      {{^has_core_firebase}}- *tools_install_shorebird{{/has_core_firebase}}
+      {{#has_core_shorebird}}- *tools_install_shorebird{{/has_core_shorebird}}
+      {{^has_core_shorebird}}# De-comment the line below if you want to use shorebird
+      # - *tools_install_shorebird{{/has_core_shorebird}}
       - *copy_config_file_env_vars
       {{#has_core_firebase}}- *copy_config_files_firebase{{/has_core_firebase}}
+      {{^has_core_firebase}}# De-comment the line below if your app uses firebase
+      # - *copy_config_files_firebase{{/has_core_firebase}}
       - *signing_init_keychain
       - *signing_add_certificates
       - *signing_setup_xcode
@@ -858,13 +889,20 @@ workflows:
       - *get_version_from_pubspec
       - *tools_install_flutterfire
       - *tools_verify_flutterfire
-      {{^has_core_firebase}}- *tools_install_shorebird{{/has_core_firebase}}
+      {{#has_core_shorebird}}- *tools_install_shorebird{{/has_core_shorebird}}
+      {{^has_core_shorebird}}# De-comment the line below if you want to use shorebird
+      # - *tools_install_shorebird{{/has_core_shorebird}}
       - *copy_config_file_env_vars
       {{#has_core_firebase}}- *copy_config_files_firebase{{/has_core_firebase}}
+      {{^has_core_firebase}}# De-comment the line below if your app uses firebase
+      # - *copy_config_files_firebase{{/has_core_firebase}}
       - *deps_setup_local_properties
       - *flutter_clean_and_rebuild
       - *build_font_awesome
-      - *android_build_shorebird
+      {{#has_core_shorebird}}- *android_build_shorebird{{/has_core_shorebird}}
+      {{^has_core_shorebird}}- *android_build
+      # Replace line above by the line below if you want to use shorebird
+      # - *android_build_shorebird{{/has_core_shorebird}}
     artifacts:
       - build/**/outputs/**/*.aab
       - build/**/outputs/**/mapping.txt
@@ -905,9 +943,13 @@ workflows:
       - *get_version_from_pubspec
       - *tools_install_flutterfire
       - *tools_verify_flutterfire
-      {{^has_core_firebase}}- *tools_install_shorebird{{/has_core_firebase}}
+      {{#has_core_shorebird}}- *tools_install_shorebird{{/has_core_shorebird}}
+      {{^has_core_shorebird}}# De-comment the line below if you want to use shorebird
+      # - *tools_install_shorebird{{/has_core_shorebird}}
       - *copy_config_file_env_vars
       {{#has_core_firebase}}- *copy_config_files_firebase{{/has_core_firebase}}
+      {{^has_core_firebase}}# De-comment the line below if your app uses firebase
+      # - *copy_config_files_firebase{{/has_core_firebase}}
       - *deps_setup_local_properties
       - *flutter_clean_and_rebuild
       - *build_font_awesome
@@ -948,9 +990,13 @@ workflows:
       - *is_regular_build
       - *get_version_from_pubspec
       - *tools_install_flutterfire
-      {{^has_core_firebase}}- *tools_install_shorebird{{/has_core_firebase}}
+      {{#has_core_shorebird}}- *tools_install_shorebird{{/has_core_shorebird}}
+      {{^has_core_shorebird}}# De-comment the line below if you want to use shorebird
+      # - *tools_install_shorebird{{/has_core_shorebird}}
       - *copy_config_file_env_vars
       {{#has_core_firebase}}- *copy_config_files_firebase{{/has_core_firebase}}
+      {{^has_core_firebase}}# De-comment the line below if your app uses firebase
+      # - *copy_config_files_firebase{{/has_core_firebase}}
       - *signing_init_keychain
       - *signing_add_certificates
       - *signing_setup_xcode
@@ -958,7 +1004,9 @@ workflows:
       - *deps_install_pods
       - *build_font_awesome
       {{#has_core_shorebird}}- *ios_build_shorebird{{/has_core_shorebird}}
-      {{^has_core_shorebird}}- *ios_build{{/has_core_shorebird}}
+      {{^has_core_shorebird}}- *ios_build
+      # Replace line above by the line below if you want to use shorebird
+      # - *ios_build_shorebird{{/has_core_shorebird}}
       - *crash_upload_dsym
     artifacts:
       - build/ios/ipa/*.ipa
@@ -1011,9 +1059,13 @@ workflows:
       - *get_version_from_pubspec
       - *tools_install_flutterfire
       - *tools_verify_flutterfire
-      {{^has_core_firebase}}- *tools_install_shorebird{{/has_core_firebase}}
+      {{#has_core_shorebird}}- *tools_install_shorebird{{/has_core_shorebird}}
+      {{^has_core_shorebird}}# De-comment the line below if you want to use shorebird
+      # - *tools_install_shorebird{{/has_core_shorebird}}
       - *copy_config_file_env_vars
       {{#has_core_firebase}}- *copy_config_files_firebase{{/has_core_firebase}}
+      {{^has_core_firebase}}# De-comment the line below if your app uses firebase
+      # - *copy_config_files_firebase{{/has_core_firebase}}
       - *signing_init_keychain
       - *signing_add_certificates
       - *signing_setup_xcode
@@ -1051,13 +1103,20 @@ workflows:
       - *get_version_from_pubspec
       - *tools_install_flutterfire
       - *tools_verify_flutterfire
-      {{^has_core_firebase}}- *tools_install_shorebird{{/has_core_firebase}}
+      {{#has_core_shorebird}}- *tools_install_shorebird{{/has_core_shorebird}}
+      {{^has_core_shorebird}}# De-comment the line below if you want to use shorebird
+      # - *tools_install_shorebird{{/has_core_shorebird}}
       - *copy_config_file_env_vars
       {{#has_core_firebase}}- *copy_config_files_firebase{{/has_core_firebase}}
+      {{^has_core_firebase}}# De-comment the line below if your app uses firebase
+      # - *copy_config_files_firebase{{/has_core_firebase}}
       - *deps_setup_local_properties
       - *flutter_clean_and_rebuild
       - *build_font_awesome
-      - *android_build_shorebird
+      {{#has_core_shorebird}}- *android_build_shorebird{{/has_core_shorebird}}
+      {{^has_core_shorebird}}- *android_build
+      # Replace line above by the line below if you want to use shorebird
+      # - *android_build_shorebird{{/has_core_shorebird}}
     artifacts:
       - build/**/outputs/**/*.aab
       - build/**/outputs/**/mapping.txt
@@ -1098,9 +1157,13 @@ workflows:
       - *get_version_from_pubspec
       - *tools_install_flutterfire
       - *tools_verify_flutterfire
-      {{^has_core_firebase}}- *tools_install_shorebird{{/has_core_firebase}}
+      {{#has_core_shorebird}}- *tools_install_shorebird{{/has_core_shorebird}}
+      {{^has_core_shorebird}}# De-comment the line below if you want to use shorebird
+      # - *tools_install_shorebird{{/has_core_shorebird}}
       - *copy_config_file_env_vars
       {{#has_core_firebase}}- *copy_config_files_firebase{{/has_core_firebase}}
+      {{^has_core_firebase}}# De-comment the line below if your app uses firebase
+      # - *copy_config_files_firebase{{/has_core_firebase}}
       - *deps_setup_local_properties
       - *flutter_clean_and_rebuild
       - *build_font_awesome
