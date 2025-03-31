@@ -4,7 +4,7 @@ app:
 flavors:
   {{#has_dev_env}}dev:
     app:
-      name: "{{project_name.titleCase()}} Dev"
+      name: "{{app_name}} Dev"
     android:
       applicationId: "{{android_package_name}}.dev"
       # icon: "assets/envs/dev/app-icon.png"
@@ -20,7 +20,7 @@ flavors:
   {{/has_dev_env}}
   {{#has_stag_env}}stag:
     app:
-      name: "{{project_name.titleCase()}} Stag"
+      name: "{{app_name}} Stag"
     android:
       applicationId: "{{android_package_name}}.stag"  
       # icon: "assets/envs/stag/app-icon.png"
@@ -36,7 +36,7 @@ flavors:
   {{/has_stag_env}}
   {{#has_testing_env}}testing:
     app:
-      name: "{{project_name.titleCase()}} Testing"
+      name: "{{app_name}} Testing"
     android:
       applicationId: "{{android_package_name}}.testing"  
       # icon: "assets/envs/testing/app-icon.png"
@@ -52,7 +52,7 @@ flavors:
   {{/has_testing_env}}
   {{#has_prod_env}}prod:
     app:
-      name: "{{project_name.titleCase()}}"
+      name: "{{app_name}}"
     android:
       applicationId: "{{android_package_name}}"  
       # icon: "assets/envs/prod/app-icon.png"

@@ -30,6 +30,10 @@ vars:
     description: The name of the project
     default: my_project_name
     prompt: What is the name of the project?
+  app_name:
+    type: string
+    description: The name of the app
+    prompt: What is the name of the app?
   android_package_name:
     type: string
     description: The name of the android package
