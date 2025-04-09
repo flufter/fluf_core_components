@@ -199,7 +199,12 @@ definitions:
         script: | 
           flutter clean
           flutter pub get
-          flutter pub run build_runner build --delete-conflicting-outputs
+          if grep -q "build_runner" pubspec.yaml; then
+            echo "Running build_runner..."
+            flutter pub run build_runner build --delete-conflicting-outputs
+          else
+            echo "build_runner not found in pubspec.yaml. Skipping build_runner."
+          fi
     - &deps_install_pods
         name: Install CocoaPods Dependencies
         script: | 
@@ -546,7 +551,9 @@ workflows:
       groups:
         - config_vars_prod
         - code_signing
-        {{^has_core_shorebird}}- shorebird{{/has_core_shorebird}}
+        {{#has_core_shorebird}}- shorebird{{/has_core_shorebird}}
+        {{^has_core_shorebird}}# De-comment the line below if you want to use shorebird
+        # - code_signing{{/has_core_shorebird}}
     triggering:
       events:
         - push
@@ -579,7 +586,9 @@ workflows:
       {{^has_core_shorebird}}- *ios_build
       # Replace line above by the line below if you want to use shorebird
       # - *ios_build_shorebird{{/has_core_shorebird}}
-      - *crash_upload_dsym
+      {{#has_core_firebase}}- *crash_upload_dsym{{/has_core_firebase}}
+      {{^has_core_firebase}}# De-comment the line below if your app uses firebase
+      # - *crash_upload_dsym{{/has_core_firebase}}
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
@@ -614,7 +623,9 @@ workflows:
       groups:
         - config_vars_prod
         - code_signing
-        {{^has_core_shorebird}}- shorebird{{/has_core_shorebird}}
+        {{#has_core_shorebird}}- shorebird{{/has_core_shorebird}}
+        {{^has_core_shorebird}}# De-comment the line below if you want to use shorebird
+        # - code_signing{{/has_core_shorebird}}
     triggering:
       events:
         - push
@@ -658,7 +669,9 @@ workflows:
       groups:
         - config_vars_prod
         - google_credentials
-        {{^has_core_shorebird}}- shorebird{{/has_core_shorebird}}
+        {{#has_core_shorebird}}- shorebird{{/has_core_shorebird}}
+        {{^has_core_shorebird}}# De-comment the line below if you want to use shorebird
+        # - code_signing{{/has_core_shorebird}}
     triggering:
       events:
         - push
@@ -712,7 +725,9 @@ workflows:
       groups:
         - config_vars_prod
         - google_credentials
-        {{^has_core_shorebird}}- shorebird{{/has_core_shorebird}}
+        {{#has_core_shorebird}}- shorebird{{/has_core_shorebird}}
+        {{^has_core_shorebird}}# De-comment the line below if you want to use shorebird
+        # - code_signing{{/has_core_shorebird}}
     triggering:
       events:
         - push
@@ -760,7 +775,9 @@ workflows:
       groups:
         - config_vars_stag
         - code_signing
-        {{^has_core_shorebird}}- shorebird{{/has_core_shorebird}}
+        {{#has_core_shorebird}}- shorebird{{/has_core_shorebird}}
+        {{^has_core_shorebird}}# De-comment the line below if you want to use shorebird
+        # - code_signing{{/has_core_shorebird}}
     triggering:
       events:
         - push
@@ -793,7 +810,9 @@ workflows:
       {{^has_core_shorebird}}- *ios_build
       # Replace line above by the line below if you want to use shorebird
       # - *ios_build_shorebird{{/has_core_shorebird}}
-      - *crash_upload_dsym
+      {{#has_core_firebase}}- *crash_upload_dsym{{/has_core_firebase}}
+      {{^has_core_firebase}}# De-comment the line below if your app uses firebase
+      # - *crash_upload_dsym{{/has_core_firebase}}
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
@@ -828,7 +847,9 @@ workflows:
       groups:
         - config_vars_stag
         - code_signing
-        {{^has_core_shorebird}}- shorebird{{/has_core_shorebird}}
+        {{#has_core_shorebird}}- shorebird{{/has_core_shorebird}}
+        {{^has_core_shorebird}}# De-comment the line below if you want to use shorebird
+        # - code_signing{{/has_core_shorebird}}
     triggering:
       events:
         - push
@@ -872,7 +893,9 @@ workflows:
       groups:
         - config_vars_stag
         - google_credentials
-        {{^has_core_shorebird}}- shorebird{{/has_core_shorebird}}
+        {{#has_core_shorebird}}- shorebird{{/has_core_shorebird}}
+        {{^has_core_shorebird}}# De-comment the line below if you want to use shorebird
+        # - code_signing{{/has_core_shorebird}}
     triggering:
       events:
         - push
@@ -926,7 +949,9 @@ workflows:
       groups:
         - config_vars_stag
         - google_credentials
-        {{^has_core_shorebird}}- shorebird{{/has_core_shorebird}}
+        {{#has_core_shorebird}}- shorebird{{/has_core_shorebird}}
+        {{^has_core_shorebird}}# De-comment the line below if you want to use shorebird
+        # - code_signing{{/has_core_shorebird}}
     triggering:
       events:
         - push
@@ -974,7 +999,9 @@ workflows:
       groups:
         - config_vars_testing
         - code_signing
-        {{^has_core_shorebird}}- shorebird{{/has_core_shorebird}}
+        {{#has_core_shorebird}}- shorebird{{/has_core_shorebird}}
+        {{^has_core_shorebird}}# De-comment the line below if you want to use shorebird
+        # - code_signing{{/has_core_shorebird}}
     triggering:
       events:
         - push
@@ -1007,7 +1034,9 @@ workflows:
       {{^has_core_shorebird}}- *ios_build
       # Replace line above by the line below if you want to use shorebird
       # - *ios_build_shorebird{{/has_core_shorebird}}
-      - *crash_upload_dsym
+      {{#has_core_firebase}}- *crash_upload_dsym{{/has_core_firebase}}
+      {{^has_core_firebase}}# De-comment the line below if your app uses firebase
+      # - *crash_upload_dsym{{/has_core_firebase}}
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
@@ -1042,7 +1071,9 @@ workflows:
       groups:
         - config_vars_testing
         - code_signing
-        {{^has_core_shorebird}}- shorebird{{/has_core_shorebird}}
+        {{#has_core_shorebird}}- shorebird{{/has_core_shorebird}}
+        {{^has_core_shorebird}}# De-comment the line below if you want to use shorebird
+        # - code_signing{{/has_core_shorebird}}
     triggering:
       events:
         - push
@@ -1086,7 +1117,9 @@ workflows:
       groups:
         - config_vars_testing
         - google_credentials
-        {{^has_core_shorebird}}- shorebird{{/has_core_shorebird}}
+        {{#has_core_shorebird}}- shorebird{{/has_core_shorebird}}
+        {{^has_core_shorebird}}# De-comment the line below if you want to use shorebird
+        # - code_signing{{/has_core_shorebird}}
     triggering:
       events:
         - push
@@ -1140,7 +1173,9 @@ workflows:
       groups:
         - config_vars_testing
         - google_credentials
-        {{^has_core_shorebird}}- shorebird{{/has_core_shorebird}}
+        {{#has_core_shorebird}}- shorebird{{/has_core_shorebird}}
+        {{^has_core_shorebird}}# De-comment the line below if you want to use shorebird
+        # - code_signing{{/has_core_shorebird}}
     triggering:
       events:
         - push
