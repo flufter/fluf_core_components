@@ -82,79 +82,106 @@ class _MyHomePageState extends State<MyHomePage> {
         // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
         // change color while the other colors stay the same.
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          IconButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text('Localization Example'),
+                  content: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          // Localization examples from documentation
+                          const Text(
+                            'Internationalization Examples',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // 1. Placeholder example
+                          const Text(
+                            'Placeholder Example:',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(context.l10n.hello('John')),
+                          const SizedBox(height: 16),
+
+                          // 2. Plural example
+                          const Text(
+                            'Plural Examples:',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(context.l10n.nWombats(0)),
+                          Text(context.l10n.nWombats(1)),
+                          Text(context.l10n.nWombats(5)),
+                          const SizedBox(height: 16),
+
+                          // 3. Select/Gender example
+                          const Text(
+                            'Select/Gender Examples:',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(context.l10n.pronoun('male')),
+                          Text(context.l10n.pronoun('female')),
+                          Text(context.l10n.pronoun('other')),
+                          const SizedBox(height: 16),
+
+                          // 4. Number formatting example
+                          const Text(
+                            'Number Formatting Example:',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(context.l10n.numberOfDataPoints(1200000)),
+                          const SizedBox(height: 16),
+
+                          // 5. Date formatting example
+                          const Text(
+                            'Date Formatting Example:',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            context.l10n.helloWorldOn(
+                              DateTime.utc(1959, 7, 9),
+                            ),
+                          ),
+
+                          // 6. Escaping syntax example
+                          const Text(
+                            'Escaping Syntax Example:',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(context.l10n.escapedExample),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+            icon: const Icon(Icons.language),
+          ),
+        ],
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              // Original counter example
-              Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      context.l10n.youHavePushedTheButtonThisManyTimes,
-                    ),
-                    Text(
-                      '$_counter',
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // Localization examples from documentation
-              const Text(
-                'Internationalization Examples',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-
-              // 1. Placeholder example
-              const Text('Placeholder Example:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              Text(context.l10n.hello('John')),
-              const SizedBox(height: 16),
-
-              // 2. Plural example
-              const Text('Plural Examples:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              Text(context.l10n.nWombats(0)),
-              Text(context.l10n.nWombats(1)),
-              Text(context.l10n.nWombats(5)),
-              const SizedBox(height: 16),
-
-              // 3. Select/Gender example
-              const Text('Select/Gender Examples:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              Text(context.l10n.pronoun('male')),
-              Text(context.l10n.pronoun('female')),
-              Text(context.l10n.pronoun('other')),
-              const SizedBox(height: 16),
-
-              // 4. Number formatting example
-              const Text('Number Formatting Example:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              Text(context.l10n.numberOfDataPoints(1200000)),
-              const SizedBox(height: 16),
-
-              // 5. Date formatting example
-              const Text('Date Formatting Example:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              Text(context.l10n.helloWorldOn(DateTime.utc(1959, 7, 9))),
-
-              // 6. Escaping syntax example
-              const Text('Escaping Syntax Example:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              Text(context.l10n.escapedExample),
-            ],
-          ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(context.l10n.youHavePushedTheButtonThisManyTimes),
+            Text(
+              '$_counter',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
