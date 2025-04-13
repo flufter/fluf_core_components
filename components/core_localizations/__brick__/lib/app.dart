@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:{{project_name.snakeCase()}}/l10n/l10n.dart';
+import 'package:flutter/services.dart';
 
 // Define color variables
 final Color pinkColor = const Color(0xFFDA79E5);
