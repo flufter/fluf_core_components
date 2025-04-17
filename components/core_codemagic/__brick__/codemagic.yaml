@@ -109,7 +109,7 @@ definitions:
         script: | 
           if which flutterfire > /dev/null; then
             echo "FlutterFire CLI is available"
-            flutterfire --version
+            # flutterfire --version
           else
             echo "FlutterFire CLI is not available"
             echo "PATH is: $PATH"
