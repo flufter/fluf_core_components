@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:{{project_name.snakeCase()}}/l10n/l10n.dart';
 import 'package:flutter/services.dart';
 
 // Define color variables
@@ -195,7 +194,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(context.l10n.youHavePushedTheButtonThisManyTimes),
+                Text("You have pushed the button this many times:"),
                 Text(
                   '$_counter',
                   style: Theme.of(context).textTheme.headlineMedium,
