@@ -35,8 +35,6 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: purpleColor),
         useMaterial3: true,
       ),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
       home: const MyHomePage(title: '{{project_name.titleCase()}}'),
       builder: (context, child) {
         return Banner(
