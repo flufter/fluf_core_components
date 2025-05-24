@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:{{project_name.snakeCase()}}/app.dart';
+import 'package:{{project_name.snakeCase()}}/app/app.dart';
 {{#has_core_splash_screen}}import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter/services.dart';{{/has_core_splash_screen}}
 
