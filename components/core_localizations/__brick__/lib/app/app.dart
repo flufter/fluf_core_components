@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
       home: const MyHomePage(title: '{{project_name.titleCase()}}'),
       builder: (context, child) {
         return Banner(
-          message: 'Codika',
+          message: 'Fluf',
           location: BannerLocation.topEnd,
           color: pinkColor,
           shadow: const BoxShadow(

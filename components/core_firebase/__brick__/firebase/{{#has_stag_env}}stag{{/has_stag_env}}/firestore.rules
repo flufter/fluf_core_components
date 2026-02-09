@@ -33,7 +33,7 @@ service cloud.firestore {
       return resource.data;
     }
 
-    // CODIKA_INSERT_RULES_HERE
+    // FLUF_INSERT_RULES_HERE
 
     match /{document=**} {
       allow read, write: if false;

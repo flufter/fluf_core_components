@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="STAG | Profile" type="FlutterRunConfigurationType" factoryName="Flutter">
     <option name="additionalArgs" value="--profile" />
-    <option name="additionalArgs" value="--dart-define-from-file=.codika/config/stag/.env" />
+    <option name="additionalArgs" value="--dart-define-from-file=.fluf/config/stag/.env" />
     <option name="buildFlavor" value="stag" />
     <option name="filePath" value="$PROJECT_DIR$/lib/main_stag.dart" />
     <method v="2" />

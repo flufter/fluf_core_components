@@ -11,7 +11,7 @@
             "type": "dart",
             "program": "lib/main_dev.dart",
             "flutterMode": "debug",
-            "toolArgs": ["--dart-define-from-file=.codika/config/dev/.env"],
+            "toolArgs": ["--dart-define-from-file=.fluf/config/dev/.env"],
             "args" : ["--flavor", "dev"]
         },
         {
@@ -20,7 +20,7 @@
             "type": "dart",
             "program": "lib/main_dev.dart",
             "flutterMode": "profile",
-            "toolArgs": ["--dart-define-from-file=.codika/config/dev/.env"],
+            "toolArgs": ["--dart-define-from-file=.fluf/config/dev/.env"],
             "args" : ["--flavor", "dev"]
         },
         {
@@ -29,7 +29,7 @@
             "type": "dart",
             "program": "lib/main_dev.dart",
             "flutterMode": "release",
-            "toolArgs": ["--dart-define-from-file=.codika/config/dev/.env"],
+            "toolArgs": ["--dart-define-from-file=.fluf/config/dev/.env"],
             "args" : ["--flavor", "dev"]
         },
         {{/has_dev_env}}
@@ -40,7 +40,7 @@
             "type": "dart",
             "program": "lib/main_testing.dart",
             "flutterMode": "debug",
-            "toolArgs": ["--dart-define-from-file=.codika/config/testing/.env"],
+            "toolArgs": ["--dart-define-from-file=.fluf/config/testing/.env"],
             "args" : ["--flavor", "testing"]
         },
         {
@@ -49,7 +49,7 @@
             "type": "dart",
             "program": "lib/main_testing.dart",
             "flutterMode": "profile",
-            "toolArgs": ["--dart-define-from-file=.codika/config/testing/.env"],
+            "toolArgs": ["--dart-define-from-file=.fluf/config/testing/.env"],
             "args" : ["--flavor", "testing"]
         },
         {
@@ -58,7 +58,7 @@
             "type": "dart",
             "program": "lib/main_testing.dart",
             "flutterMode": "release",
-            "toolArgs": ["--dart-define-from-file=.codika/config/testing/.env"],
+            "toolArgs": ["--dart-define-from-file=.fluf/config/testing/.env"],
             "args" : ["--flavor", "testing"]
         },
         {{/has_testing_env}}
@@ -69,7 +69,7 @@
             "type": "dart",
             "program": "lib/main_stag.dart",
             "flutterMode": "debug",
-            "toolArgs": ["--dart-define-from-file=.codika/config/stag/.env"],
+            "toolArgs": ["--dart-define-from-file=.fluf/config/stag/.env"],
             "args" : ["--flavor", "stag"]
         },
         {
@@ -78,7 +78,7 @@
             "type": "dart",
             "program": "lib/main_stag.dart",
             "flutterMode": "profile",
-            "toolArgs": ["--dart-define-from-file=.codika/config/stag/.env"],
+            "toolArgs": ["--dart-define-from-file=.fluf/config/stag/.env"],
             "args" : ["--flavor", "stag"]
         },
         {
@@ -87,7 +87,7 @@
             "type": "dart",
             "program": "lib/main_stag.dart",
             "flutterMode": "release",
-            "toolArgs": ["--dart-define-from-file=.codika/config/stag/.env"],
+            "toolArgs": ["--dart-define-from-file=.fluf/config/stag/.env"],
             "args" : ["--flavor", "stag"]
         },
         {{/has_stag_env}}
@@ -98,7 +98,7 @@
             "type": "dart",
             "program": "lib/main_prod.dart",
             "flutterMode": "debug",
-            "toolArgs": ["--dart-define-from-file=.codika/config/prod/.env"],
+            "toolArgs": ["--dart-define-from-file=.fluf/config/prod/.env"],
             "args" : ["--flavor", "prod"]
         },
         {
@@ -107,7 +107,7 @@
             "type": "dart",
             "program": "lib/main_prod.dart",
             "flutterMode": "profile",
-            "toolArgs": ["--dart-define-from-file=.codika/config/prod/.env"],
+            "toolArgs": ["--dart-define-from-file=.fluf/config/prod/.env"],
             "args" : ["--flavor", "prod"]
         },
         {
@@ -116,7 +116,7 @@
             "type": "dart",
             "program": "lib/main_prod.dart",
             "flutterMode": "release",
-            "toolArgs": ["--dart-define-from-file=.codika/config/prod/.env"],
+            "toolArgs": ["--dart-define-from-file=.fluf/config/prod/.env"],
             "args" : ["--flavor", "prod"]
         }   
         {{/has_prod_env}}

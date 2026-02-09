@@ -1,6 +1,6 @@
 {
   "@@locale": "es",
-  "counterAppBarTitle": "Codika App",
+  "counterAppBarTitle": "Fluf App",
   "@counterAppBarTitle": {
     "description": "Texto mostrado en la AppBar de la página del contador"
   },

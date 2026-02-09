@@ -129,14 +129,14 @@ definitions:
         script: |
           # Create all necessary directories first
           echo "Creating required directory..."
-          mkdir -p "$FCI_BUILD_DIR/.codika/config/$ENV"
+          mkdir -p "$FCI_BUILD_DIR/.fluf/config/$ENV"
           
           # Environment Keys
           if [ -z "$ENV_VARS_KEYS" ]; then
             echo "ERROR: ENV_VARS_KEYS is not set."
           else
-            echo $ENV_VARS_KEYS | base64 --decode > "$FCI_BUILD_DIR/.codika/config/$ENV/.env"
-            echo " - Environment Keys File Copied at $FCI_BUILD_DIR/.codika/config/$ENV/.env"
+            echo $ENV_VARS_KEYS | base64 --decode > "$FCI_BUILD_DIR/.fluf/config/$ENV/.env"
+            echo " - Environment Keys File Copied at $FCI_BUILD_DIR/.fluf/config/$ENV/.env"
           fi
     - &copy_config_files_firebase
         name: Copy Configuration Files For Firebase
@@ -275,7 +275,7 @@ definitions:
             --build-name=$PUBSPEC_MAJOR.$PUBSPEC_MINOR.$PUBSPEC_PATCH \
             --build-number=$PUBSPEC_BUILD_NUMBER \
             --export-options-plist=/Users/builder/export_options.plist \
-            --dart-define-from-file=.codika/config/$ENV/.env
+            --dart-define-from-file=.fluf/config/$ENV/.env
 
           # Capture the exit status of the flutter build command
           FLUTTER_BUILD_STATUS=$?
@@ -313,7 +313,7 @@ definitions:
             --build-name=$PUBSPEC_MAJOR.$PUBSPEC_MINOR.$PUBSPEC_PATCH \
             --build-number=$PUBSPEC_BUILD_NUMBER \
             --export-options-plist=/Users/builder/export_options.plist \
-            --dart-define-from-file=.codika/config/$ENV/.env
+            --dart-define-from-file=.fluf/config/$ENV/.env
 
           # Capture the exit status of the flutter build command
           FLUTTER_BUILD_STATUS=$?
@@ -379,7 +379,7 @@ definitions:
             --flavor $ENV \
             --build-name=$PUBSPEC_MAJOR.$PUBSPEC_MINOR.$PUBSPEC_PATCH \
             --build-number=$PUBSPEC_BUILD_NUMBER \
-            --dart-define-from-file=.codika/config/$ENV/.env
+            --dart-define-from-file=.fluf/config/$ENV/.env
 
           # Capture the exit status of the flutter build command
           FLUTTER_BUILD_STATUS=$?
@@ -416,7 +416,7 @@ definitions:
             --flavor $ENV \
             --build-name=$PUBSPEC_MAJOR.$PUBSPEC_MINOR.$PUBSPEC_PATCH \
             --build-number=$PUBSPEC_BUILD_NUMBER \
-            --dart-define-from-file=.codika/config/$ENV/.env
+            --dart-define-from-file=.fluf/config/$ENV/.env
 
           # Capture the exit status of the flutter build command
           FLUTTER_BUILD_STATUS=$?

@@ -3,7 +3,7 @@
 # Check if we're in the correct directory
 CURRENT_DIR=$(basename "$(pwd)")
 if [ "$CURRENT_DIR" != "scripts" ]; then
-    echo "Error: This script must be run from its location in codika_core_components/scripts"
+    echo "Error: This script must be run from its location in fluf_core_components/scripts"
     exit 1
 fi
 

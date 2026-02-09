@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="DEV | Debug" type="FlutterRunConfigurationType" factoryName="Flutter">
-    <option name="additionalArgs" value="--dart-define-from-file=.codika/config/dev/.env" />
+    <option name="additionalArgs" value="--dart-define-from-file=.fluf/config/dev/.env" />
     <option name="buildFlavor" value="dev" />
     <option name="filePath" value="$PROJECT_DIR$/lib/main_dev.dart" />
     <method v="2" />

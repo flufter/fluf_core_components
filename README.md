@@ -1,14 +1,14 @@
-# Codika Core Components
+# Fluf Core Components
 
-This repository contains the core components of the Codika CLI.
+This repository contains the core components of the Fluf CLI.
 
 ## Installation
 
-Those components are meant to be used via the Codika CLI.
-To obtain the CLI, please refer to the [Codika Installation Guide](https://docs.codika.io/codika/installation).
+Those components are meant to be used via the Fluf CLI.
+To obtain the CLI, please refer to the [Fluf Installation Guide](https://docs.fluf.ai/fluf/installation).
 
 Once the CLI is installed, you can use the following command to install the components:
 
 ```bash
-codika install
+fluf install
 ```
