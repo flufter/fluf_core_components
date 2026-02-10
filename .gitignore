@@ -2,3 +2,7 @@
 
 .mason/**
 mason-lock.json
+
+# Bundle artifacts (replaced by tag-based releases)
+latest/
+archives/
