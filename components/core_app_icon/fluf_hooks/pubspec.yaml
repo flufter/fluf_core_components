@@ -1,0 +1,5 @@
+name: core_app_icon_fluf_hooks
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+dependencies:
+  image: ^4.0.0

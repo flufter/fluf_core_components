@@ -1,0 +1,39 @@
+name: Validate Components
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    paths:
+      - "components/**/fluf_component.yaml"
+      - "scripts/validate_components/**"
+      - ".github/workflows/validate_components.yaml"
+  push:
+    branches:
+      - main
+    paths:
+      - "components/**/fluf_component.yaml"
+      - "scripts/validate_components/**"
+      - ".github/workflows/validate_components.yaml"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v4
+
+      - name: 🎯 Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: "stable"
+
+      - name: 📦 Install Dependencies
+        working-directory: scripts/validate_components
+        run: dart pub get
+
+      - name: 🔍 Validate Component Definitions
+        working-directory: scripts/validate_components
+        run: dart run bin/validate.dart ${{ github.workspace }}

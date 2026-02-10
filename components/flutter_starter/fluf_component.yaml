@@ -1,0 +1,21 @@
+component:
+  name: starter
+  organisation: flutter
+  description: "This is the starter project for Flutter."
+  version: "0.0.1-dev"
+  type: starter
+  status: published
+  starterProject: null
+  dependencies: []
+  flags:
+    - core_firebase
+    - core_splash_screen
+  params: []
+  vars: []
+  hooks:
+    preInstallation: null
+    postInstallation: null
+
+parameters: []
+
+variables: []

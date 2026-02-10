@@ -1,0 +1,33 @@
+component:
+  name: flavors
+  organisation: core
+  description: "This component is used to configure the flavors."
+  version: "0.0.1-dev"
+  type: singleton
+  status: hidden
+  starterProject: null
+  dependencies: []
+  flags: []
+  params:
+    - app_name
+    - ios_bundle_id
+    - android_package_name
+  vars: []
+  hooks:
+    preInstallation: null
+    postInstallation: null
+
+parameters:
+  - name: ios_bundle_id
+    organisation: fluf
+    type: string
+    query: "What is the iOS Bundle Identifier?"
+    fromAppConfig: ios_bundle_id
+
+  - name: android_package_name
+    organisation: fluf
+    type: string
+    query: "What is the Android Package Name?"
+    fromAppConfig: android_package_name
+
+variables: []

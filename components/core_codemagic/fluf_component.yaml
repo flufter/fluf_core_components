@@ -1,0 +1,83 @@
+component:
+  name: codemagic
+  organisation: core
+  description: "This component is used to configure the Codemagic CI/CD pipeline."
+  version: "0.0.1-dev"
+  type: singleton
+  status: hidden
+  starterProject: null
+  dependencies: []
+  flags:
+    - core_shorebird
+    - core_firebase
+  params:
+    - codemagic_app_id
+    - android_signing_key_codemagic_name
+    - app_store_connect_key_codemagic_name
+    - codemagic_certificate_name
+    - codemagic_provisioning_profile_name
+    - app_id_ios
+    - ios_copyright
+    - email_address
+    - flutter_version
+  vars: []
+  hooks:
+    preInstallation: null
+    postInstallation: add_signing_configurations
+
+parameters:
+  - name: codemagic_app_id
+    organisation: fluf
+    type: string
+    query: "What is the Codemagic App ID?"
+
+  - name: email_address
+    organisation: fluf
+    type: string
+    query: "What is the email address?"
+    defaultValue: "email@example.com"
+
+  - name: google_service_account_cred_path
+    organisation: fluf
+    type: string
+    query: "What is the path to the Google Service Account Credentials?"
+
+  - name: app_store_connect_key_codemagic_name
+    organisation: fluf
+    type: string
+    query: "What is the name of your App Store Connect Key in Codemagic?"
+
+  - name: android_signing_key_codemagic_name
+    organisation: fluf
+    type: string
+    query: "What is the name of your Android Signing Key in Codemagic?"
+
+  - name: codemagic_certificate_name
+    organisation: fluf
+    type: string
+    query: "What is the name of your certificate in Codemagic?"
+
+  - name: codemagic_provisioning_profile_name
+    organisation: fluf
+    type: string
+    query: "What is the name of your provisioning profile in Codemagic?"
+    environments:
+      - prod
+      - stag
+      - testing
+
+  - name: app_id_ios
+    organisation: fluf
+    type: string
+    query: "What is the App ID for iOS?"
+    environments:
+      - prod
+      - stag
+      - testing
+
+  - name: ios_copyright
+    organisation: fluf
+    type: string
+    query: "What is the iOS Copy Right?"
+
+variables: []

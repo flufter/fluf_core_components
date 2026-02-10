@@ -1,0 +1,5 @@
+name: validate_components
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+dependencies:
+  yaml: ^3.1.0

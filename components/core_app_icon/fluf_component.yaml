@@ -1,0 +1,19 @@
+component:
+  name: app_icon
+  organisation: core
+  description: "This component is used to update the app icon."
+  version: "0.0.1-dev"
+  type: singleton
+  status: hidden
+  starterProject: null
+  dependencies: []
+  flags: []
+  params: []
+  vars: []
+  hooks:
+    preInstallation: null
+    postInstallation: null
+
+parameters: []
+
+variables: []

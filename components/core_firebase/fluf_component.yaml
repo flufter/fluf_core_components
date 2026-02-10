@@ -1,0 +1,24 @@
+component:
+  name: firebase
+  organisation: core
+  description: "This component is used to configure the Firebase project."
+  version: "0.0.1-dev"
+  type: singleton
+  status: hidden
+  starterProject: null
+  dependencies: []
+  flags: []
+  params:
+    - firebase_service_account_cred_path
+  vars: []
+  hooks:
+    preInstallation: null
+    postInstallation: null
+
+parameters:
+  - name: firebase_service_account_cred_path
+    organisation: fluf
+    type: string
+    query: "What is the path to the Firebase Service Account Credentials?"
+
+variables: []

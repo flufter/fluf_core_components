@@ -1,0 +1,4 @@
+name: core_shorebird_fluf_hooks
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+dependencies: {}
