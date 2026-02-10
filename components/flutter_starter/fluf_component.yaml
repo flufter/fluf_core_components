@@ -2,7 +2,7 @@ component:
   name: starter
   organisation: flutter
   description: "This is the starter project for Flutter."
-  version: "0.0.1-dev"
+  version: "0.1.0"
   type: starter
   status: published
   starterProject: null
