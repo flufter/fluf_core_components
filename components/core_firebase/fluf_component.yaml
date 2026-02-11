@@ -2,7 +2,7 @@ component:
   name: firebase
   organisation: core
   description: "This component is used to configure the Firebase project."
-  version: "0.1.0"
+  version: "0.1.1"
   type: singleton
   status: hidden
   starterProject: null
