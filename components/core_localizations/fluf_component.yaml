@@ -5,7 +5,7 @@ component:
   version: "0.1.0"
   type: singleton
   status: published
-  starterProject: null
+  starterProject: flutter_starter
   dependencies: []
   flags: []
   params: []
