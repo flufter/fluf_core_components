@@ -1,0 +1,280 @@
+name: Build iOS
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+        description: "The environment to build for (prod, stag, testing)"
+      bundle_id:
+        required: true
+        type: string
+        description: "The iOS bundle ID"
+      app_id:
+        required: true
+        type: string
+        description: "The App Store Connect App ID"
+      semantic_version:
+        required: true
+        type: string
+        description: "The semantic version (X.Y.Z)"
+      build_number:
+        required: true
+        type: string
+        description: "The build number"
+      flutter_version:
+        required: true
+        type: string
+        description: "The Flutter version to use"
+
+jobs:
+  build-ios:
+    name: Build iOS ({{=<% %>=}}${{ inputs.environment }}<%={{ }}=%>)
+    runs-on: macos-latest
+    timeout-minutes: 45
+    env:
+      ENV: {{=<% %>=}}${{ inputs.environment }}<%={{ }}=%>
+      ENV_UPPER: {{=<% %>=}}${{ inputs.environment }}<%={{ }}=%>
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- Flutter Setup ---
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: {{=<% %>=}}${{ inputs.flutter_version }}<%={{ }}=%>
+          channel: stable
+          cache: true
+
+      - name: Verify Flutter installation
+        run: flutter --version
+
+      # --- Codemagic CLI Tools (for signing) ---
+      - name: Install Codemagic CLI tools
+        run: pip3 install codemagic-cli-tools
+
+      # --- Environment variable to uppercase ---
+      - name: Compute uppercase environment name
+        id: env_upper
+        run: |
+          ENV_UPPER=$(echo "{{=<% %>=}}${{ inputs.environment }}<%={{ }}=%>" | tr '[:lower:]' '[:upper:]')
+          echo "ENV_UPPER=$ENV_UPPER" >> $GITHUB_ENV
+
+      # --- Decode env vars and config files from secrets ---
+      - name: Copy environment configuration files
+        env:
+          ENV_VARS_KEYS_PROD: {{=<% %>=}}${{ secrets.ENV_VARS_KEYS_PROD }}<%={{ }}=%>
+          ENV_VARS_KEYS_STAG: {{=<% %>=}}${{ secrets.ENV_VARS_KEYS_STAG }}<%={{ }}=%>
+          ENV_VARS_KEYS_TESTING: {{=<% %>=}}${{ secrets.ENV_VARS_KEYS_TESTING }}<%={{ }}=%>
+        run: |
+          # Create required directories
+          mkdir -p ".fluf/config/$ENV"
+
+          # Select the right secret based on environment
+          ENV_VARS_SECRET="ENV_VARS_KEYS_${ENV_UPPER}"
+          ENV_VARS_VALUE="${!ENV_VARS_SECRET}"
+
+          if [ -z "$ENV_VARS_VALUE" ]; then
+            echo "ERROR: $ENV_VARS_SECRET is not set."
+            exit 1
+          fi
+
+          echo "$ENV_VARS_VALUE" | base64 --decode > ".fluf/config/$ENV/.env"
+          echo " - Environment Keys File Copied at .fluf/config/$ENV/.env"
+
+      {{#has_core_firebase}}
+      - name: Copy Firebase configuration files
+        env:
+          FIREBASE_OPTIONS_PROD: {{=<% %>=}}${{ secrets.FIREBASE_OPTIONS_PROD }}<%={{ }}=%>
+          FIREBASE_OPTIONS_STAG: {{=<% %>=}}${{ secrets.FIREBASE_OPTIONS_STAG }}<%={{ }}=%>
+          FIREBASE_OPTIONS_TESTING: {{=<% %>=}}${{ secrets.FIREBASE_OPTIONS_TESTING }}<%={{ }}=%>
+          GOOGLE_SERVICE_IOS_PROD: {{=<% %>=}}${{ secrets.GOOGLE_SERVICE_IOS_PROD }}<%={{ }}=%>
+          GOOGLE_SERVICE_IOS_STAG: {{=<% %>=}}${{ secrets.GOOGLE_SERVICE_IOS_STAG }}<%={{ }}=%>
+          GOOGLE_SERVICE_IOS_TESTING: {{=<% %>=}}${{ secrets.GOOGLE_SERVICE_IOS_TESTING }}<%={{ }}=%>
+        run: |
+          # Create required directories
+          mkdir -p "lib"
+          mkdir -p "ios/flavors/$ENV"
+          mkdir -p "macos/flavors/$ENV"
+
+          # Firebase Options
+          FIREBASE_SECRET="FIREBASE_OPTIONS_${ENV_UPPER}"
+          FIREBASE_VALUE="${!FIREBASE_SECRET}"
+          if [ -z "$FIREBASE_VALUE" ]; then
+            echo "ERROR: $FIREBASE_SECRET is not set."
+          else
+            echo "$FIREBASE_VALUE" | base64 --decode > "lib/firebase_options_$ENV.dart"
+            echo " - Firebase Config File Copied"
+          fi
+
+          # iOS GoogleService-Info.plist
+          IOS_SECRET="GOOGLE_SERVICE_IOS_${ENV_UPPER}"
+          IOS_VALUE="${!IOS_SECRET}"
+          if [ -z "$IOS_VALUE" ]; then
+            echo "ERROR: $IOS_SECRET is not set."
+          else
+            echo "$IOS_VALUE" | base64 --decode > "ios/flavors/$ENV/GoogleService-Info.plist"
+            echo " - Google Service iOS Config File Copied"
+          fi
+      {{/has_core_firebase}}
+
+      # --- iOS Signing with Codemagic CLI tools ---
+      - name: Initialize Keychain
+        env:
+          CERTIFICATE_PRIVATE_KEY: {{=<% %>=}}${{ secrets.CERTIFICATE_PRIVATE_KEY }}<%={{ }}=%>
+        run: keychain initialize
+
+      - name: Fetch signing files
+        env:
+          APP_STORE_CONNECT_ISSUER_ID: {{=<% %>=}}${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}<%={{ }}=%>
+          APP_STORE_CONNECT_KEY_IDENTIFIER: {{=<% %>=}}${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}<%={{ }}=%>
+          APP_STORE_CONNECT_PRIVATE_KEY: {{=<% %>=}}${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}<%={{ }}=%>
+          CERTIFICATE_PRIVATE_KEY: {{=<% %>=}}${{ secrets.CERTIFICATE_PRIVATE_KEY }}<%={{ }}=%>
+        run: |
+          app-store-connect fetch-signing-files "{{=<% %>=}}${{ inputs.bundle_id }}<%={{ }}=%>" \
+            --type IOS_APP_STORE \
+            --create
+
+      - name: Add certificates to Keychain
+        env:
+          CERTIFICATE_PRIVATE_KEY: {{=<% %>=}}${{ secrets.CERTIFICATE_PRIVATE_KEY }}<%={{ }}=%>
+        run: keychain add-certificates
+
+      - name: Configure Xcode signing
+        run: xcode-project use-profiles
+
+      # --- Build ---
+      - name: Clean and rebuild Flutter app
+        run: |
+          flutter clean
+          flutter pub get
+          if grep -q "build_runner" pubspec.yaml; then
+            echo "Running build_runner..."
+            flutter pub run build_runner build --delete-conflicting-outputs
+          else
+            echo "build_runner not found in pubspec.yaml. Skipping build_runner."
+          fi
+
+      - name: Install CocoaPods dependencies
+        run: |
+          cd ios && pod install && cd ..
+
+      - name: Build Font Awesome Icons
+        run: |
+          DIR="cloned/font_awesome_flutter/"
+          if [ -d "$DIR" ]; then
+            echo "Directory $DIR exists."
+            cd "$DIR"
+            flutter pub get
+            cd -
+          else
+            echo "Directory $DIR does not exist. Skipping."
+          fi
+
+      {{#has_core_shorebird}}
+      - name: Install Shorebird CLI
+        run: |
+          curl --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh -sSf | bash
+          echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
+
+      - name: Build iOS IPA (Shorebird release)
+        env:
+          SHOREBIRD_TOKEN: {{=<% %>=}}${{ secrets.SHOREBIRD_TOKEN }}<%={{ }}=%>
+        run: |
+          echo "Building App Version: {{=<% %>=}}${{ inputs.semantic_version }}<%={{ }}=%>+{{=<% %>=}}${{ inputs.build_number }}<%={{ }}=%>"
+
+          shorebird release ios --flavor $ENV --flutter-version={{flutter_version}} -- \
+            -t lib/main_${ENV}.dart \
+            --flavor $ENV \
+            --build-name={{=<% %>=}}${{ inputs.semantic_version }}<%={{ }}=%> \
+            --build-number={{=<% %>=}}${{ inputs.build_number }}<%={{ }}=%> \
+            --export-options-plist=$HOME/export_options.plist \
+            --dart-define-from-file=.fluf/config/$ENV/.env
+      {{/has_core_shorebird}}
+      {{^has_core_shorebird}}
+      - name: Build iOS IPA
+        run: |
+          echo "Building App Version: {{=<% %>=}}${{ inputs.semantic_version }}<%={{ }}=%>+{{=<% %>=}}${{ inputs.build_number }}<%={{ }}=%>"
+
+          flutter build ipa --flavor $ENV \
+            -t lib/main_${ENV}.dart \
+            --flavor $ENV \
+            --build-name={{=<% %>=}}${{ inputs.semantic_version }}<%={{ }}=%> \
+            --build-number={{=<% %>=}}${{ inputs.build_number }}<%={{ }}=%> \
+            --export-options-plist=$HOME/export_options.plist \
+            --dart-define-from-file=.fluf/config/$ENV/.env
+      {{/has_core_shorebird}}
+
+      {{#has_core_firebase}}
+      # --- Upload dSYM to Crashlytics ---
+      - name: Upload dSYM to Crashlytics
+        run: |
+          echo "Starting dSYM upload process..."
+
+          UPLOAD_SYMBOLS_PATH="ios/Pods/FirebaseCrashlytics/upload-symbols"
+          if [ ! -f "$UPLOAD_SYMBOLS_PATH" ]; then
+            echo "Warning: upload-symbols tool not found at $UPLOAD_SYMBOLS_PATH"
+            exit 0
+          fi
+
+          if [ ! -f "ios/flavors/$ENV/GoogleService-Info.plist" ]; then
+            echo "Warning: GoogleService-Info.plist not found in ios/flavors/$ENV/"
+            exit 0
+          fi
+
+          echo "Searching for dSYM files in archive..."
+          DSYM_DIR="build/ios/archive/Runner.xcarchive/dSYMs"
+          if [ -d "$DSYM_DIR" ]; then
+            find "$DSYM_DIR" -name "*.dSYM" | while read dsymPath; do
+              echo "Uploading dSYM: $dsymPath"
+              "$UPLOAD_SYMBOLS_PATH" \
+                -gsp ios/flavors/$ENV/GoogleService-Info.plist \
+                -p ios \
+                "$dsymPath"
+            done
+          else
+            echo "Warning: No dSYM directory found at $DSYM_DIR"
+          fi
+      {{/has_core_firebase}}
+
+      # --- Publish to App Store Connect ---
+      - name: Publish to App Store Connect
+        env:
+          APP_STORE_CONNECT_ISSUER_ID: {{=<% %>=}}${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}<%={{ }}=%>
+          APP_STORE_CONNECT_KEY_IDENTIFIER: {{=<% %>=}}${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}<%={{ }}=%>
+          APP_STORE_CONNECT_PRIVATE_KEY: {{=<% %>=}}${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}<%={{ }}=%>
+        run: |
+          app-store-connect publish \
+            --path build/ios/ipa/*.ipa \
+            --apple-id {{=<% %>=}}${{ inputs.app_id }}<%={{ }}=%> \
+            --copyright "{{ios_copyright}}"
+
+      # --- Upload artifacts ---
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ios-ipa-{{=<% %>=}}${{ inputs.environment }}<%={{ }}=%>
+          path: |
+            build/ios/ipa/*.ipa
+            build/ios/archive/Runner.xcarchive/dSYMs/*.dSYM
+
+      # --- Notify ---
+      - name: Send email notification
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: {{=<% %>=}}${{ secrets.SMTP_SERVER }}<%={{ }}=%>
+          server_port: {{=<% %>=}}${{ secrets.SMTP_PORT }}<%={{ }}=%>
+          username: {{=<% %>=}}${{ secrets.SMTP_USERNAME }}<%={{ }}=%>
+          password: {{=<% %>=}}${{ secrets.SMTP_PASSWORD }}<%={{ }}=%>
+          subject: "iOS Build ({{=<% %>=}}${{ inputs.environment }}<%={{ }}=%>) - {{=<% %>=}}${{ job.status }}<%={{ }}=%>"
+          to: {{email_address}}
+          from: "GitHub Actions <noreply@github.com>"
+          body: |
+            iOS build for {{=<% %>=}}${{ inputs.environment }}<%={{ }}=%> environment completed with status: {{=<% %>=}}${{ job.status }}<%={{ }}=%>
+            Version: {{=<% %>=}}${{ inputs.semantic_version }}<%={{ }}=%>+{{=<% %>=}}${{ inputs.build_number }}<%={{ }}=%>
+            Repository: {{=<% %>=}}${{ github.repository }}<%={{ }}=%>
+            Branch: {{=<% %>=}}${{ github.ref }}<%={{ }}=%>
+        continue-on-error: true

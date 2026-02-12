@@ -1,0 +1,205 @@
+name: Patch iOS
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+        description: "The environment to patch (prod, stag, testing)"
+      bundle_id:
+        required: true
+        type: string
+        description: "The iOS bundle ID"
+      semantic_version:
+        required: true
+        type: string
+        description: "The semantic version (X.Y.Z)"
+      build_number:
+        required: true
+        type: string
+        description: "The build number"
+      flutter_version:
+        required: true
+        type: string
+        description: "The Flutter version to use"
+
+jobs:
+  patch-ios:
+    name: Patch iOS ({{=<% %>=}}${{ inputs.environment }}<%={{ }}=%>)
+    runs-on: macos-latest
+    timeout-minutes: 45
+    env:
+      ENV: {{=<% %>=}}${{ inputs.environment }}<%={{ }}=%>
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- Flutter Setup ---
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: {{=<% %>=}}${{ inputs.flutter_version }}<%={{ }}=%>
+          channel: stable
+          cache: true
+
+      - name: Verify Flutter installation
+        run: flutter --version
+
+      # --- Codemagic CLI Tools (for signing) ---
+      - name: Install Codemagic CLI tools
+        run: pip3 install codemagic-cli-tools
+
+      # --- Environment variable to uppercase ---
+      - name: Compute uppercase environment name
+        run: |
+          ENV_UPPER=$(echo "{{=<% %>=}}${{ inputs.environment }}<%={{ }}=%>" | tr '[:lower:]' '[:upper:]')
+          echo "ENV_UPPER=$ENV_UPPER" >> $GITHUB_ENV
+
+      # --- Decode env vars and config files from secrets ---
+      - name: Copy environment configuration files
+        env:
+          ENV_VARS_KEYS_PROD: {{=<% %>=}}${{ secrets.ENV_VARS_KEYS_PROD }}<%={{ }}=%>
+          ENV_VARS_KEYS_STAG: {{=<% %>=}}${{ secrets.ENV_VARS_KEYS_STAG }}<%={{ }}=%>
+          ENV_VARS_KEYS_TESTING: {{=<% %>=}}${{ secrets.ENV_VARS_KEYS_TESTING }}<%={{ }}=%>
+        run: |
+          # Create required directories
+          mkdir -p ".fluf/config/$ENV"
+
+          # Select the right secret based on environment
+          ENV_VARS_SECRET="ENV_VARS_KEYS_${ENV_UPPER}"
+          ENV_VARS_VALUE="${!ENV_VARS_SECRET}"
+
+          if [ -z "$ENV_VARS_VALUE" ]; then
+            echo "ERROR: $ENV_VARS_SECRET is not set."
+            exit 1
+          fi
+
+          echo "$ENV_VARS_VALUE" | base64 --decode > ".fluf/config/$ENV/.env"
+          echo " - Environment Keys File Copied at .fluf/config/$ENV/.env"
+
+      {{#has_core_firebase}}
+      - name: Copy Firebase configuration files
+        env:
+          FIREBASE_OPTIONS_PROD: {{=<% %>=}}${{ secrets.FIREBASE_OPTIONS_PROD }}<%={{ }}=%>
+          FIREBASE_OPTIONS_STAG: {{=<% %>=}}${{ secrets.FIREBASE_OPTIONS_STAG }}<%={{ }}=%>
+          FIREBASE_OPTIONS_TESTING: {{=<% %>=}}${{ secrets.FIREBASE_OPTIONS_TESTING }}<%={{ }}=%>
+          GOOGLE_SERVICE_IOS_PROD: {{=<% %>=}}${{ secrets.GOOGLE_SERVICE_IOS_PROD }}<%={{ }}=%>
+          GOOGLE_SERVICE_IOS_STAG: {{=<% %>=}}${{ secrets.GOOGLE_SERVICE_IOS_STAG }}<%={{ }}=%>
+          GOOGLE_SERVICE_IOS_TESTING: {{=<% %>=}}${{ secrets.GOOGLE_SERVICE_IOS_TESTING }}<%={{ }}=%>
+        run: |
+          # Create required directories
+          mkdir -p "lib"
+          mkdir -p "ios/flavors/$ENV"
+
+          # Firebase Options
+          FIREBASE_SECRET="FIREBASE_OPTIONS_${ENV_UPPER}"
+          FIREBASE_VALUE="${!FIREBASE_SECRET}"
+          if [ -z "$FIREBASE_VALUE" ]; then
+            echo "ERROR: $FIREBASE_SECRET is not set."
+          else
+            echo "$FIREBASE_VALUE" | base64 --decode > "lib/firebase_options_$ENV.dart"
+            echo " - Firebase Config File Copied"
+          fi
+
+          # iOS GoogleService-Info.plist
+          IOS_SECRET="GOOGLE_SERVICE_IOS_${ENV_UPPER}"
+          IOS_VALUE="${!IOS_SECRET}"
+          if [ -z "$IOS_VALUE" ]; then
+            echo "ERROR: $IOS_SECRET is not set."
+          else
+            echo "$IOS_VALUE" | base64 --decode > "ios/flavors/$ENV/GoogleService-Info.plist"
+            echo " - Google Service iOS Config File Copied"
+          fi
+      {{/has_core_firebase}}
+
+      # --- iOS Signing with Codemagic CLI tools ---
+      - name: Initialize Keychain
+        env:
+          CERTIFICATE_PRIVATE_KEY: {{=<% %>=}}${{ secrets.CERTIFICATE_PRIVATE_KEY }}<%={{ }}=%>
+        run: keychain initialize
+
+      - name: Fetch signing files
+        env:
+          APP_STORE_CONNECT_ISSUER_ID: {{=<% %>=}}${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}<%={{ }}=%>
+          APP_STORE_CONNECT_KEY_IDENTIFIER: {{=<% %>=}}${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}<%={{ }}=%>
+          APP_STORE_CONNECT_PRIVATE_KEY: {{=<% %>=}}${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}<%={{ }}=%>
+          CERTIFICATE_PRIVATE_KEY: {{=<% %>=}}${{ secrets.CERTIFICATE_PRIVATE_KEY }}<%={{ }}=%>
+        run: |
+          app-store-connect fetch-signing-files "{{=<% %>=}}${{ inputs.bundle_id }}<%={{ }}=%>" \
+            --type IOS_APP_STORE \
+            --create
+
+      - name: Add certificates to Keychain
+        env:
+          CERTIFICATE_PRIVATE_KEY: {{=<% %>=}}${{ secrets.CERTIFICATE_PRIVATE_KEY }}<%={{ }}=%>
+        run: keychain add-certificates
+
+      - name: Configure Xcode signing
+        run: xcode-project use-profiles
+
+      # --- Build ---
+      - name: Clean and rebuild Flutter app
+        run: |
+          flutter clean
+          flutter pub get
+          if grep -q "build_runner" pubspec.yaml; then
+            echo "Running build_runner..."
+            flutter pub run build_runner build --delete-conflicting-outputs
+          else
+            echo "build_runner not found in pubspec.yaml. Skipping build_runner."
+          fi
+
+      - name: Install CocoaPods dependencies
+        run: |
+          cd ios && pod install && cd ..
+
+      - name: Build Font Awesome Icons
+        run: |
+          DIR="cloned/font_awesome_flutter/"
+          if [ -d "$DIR" ]; then
+            echo "Directory $DIR exists."
+            cd "$DIR"
+            flutter pub get
+            cd -
+          else
+            echo "Directory $DIR does not exist. Skipping."
+          fi
+
+      # --- Shorebird Patch ---
+      - name: Install Shorebird CLI
+        run: |
+          curl --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh -sSf | bash
+          echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
+
+      - name: Patch iOS (Shorebird)
+        env:
+          SHOREBIRD_TOKEN: {{=<% %>=}}${{ secrets.SHOREBIRD_TOKEN }}<%={{ }}=%>
+        run: |
+          PATCH_RELEASE_VERSION="{{=<% %>=}}${{ inputs.semantic_version }}<%={{ }}=%>+{{=<% %>=}}${{ inputs.build_number }}<%={{ }}=%>"
+          echo "Building Patch for version: $PATCH_RELEASE_VERSION"
+
+          shorebird patch ios --flavor $ENV \
+            -t lib/main_${ENV}.dart \
+            --flavor $ENV \
+            --release-version "$PATCH_RELEASE_VERSION" \
+            --allow-asset-diffs -- \
+            --export-options-plist=$HOME/export_options.plist
+
+      # --- Notify ---
+      - name: Send email notification
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: {{=<% %>=}}${{ secrets.SMTP_SERVER }}<%={{ }}=%>
+          server_port: {{=<% %>=}}${{ secrets.SMTP_PORT }}<%={{ }}=%>
+          username: {{=<% %>=}}${{ secrets.SMTP_USERNAME }}<%={{ }}=%>
+          password: {{=<% %>=}}${{ secrets.SMTP_PASSWORD }}<%={{ }}=%>
+          subject: "iOS Patch ({{=<% %>=}}${{ inputs.environment }}<%={{ }}=%>) - {{=<% %>=}}${{ job.status }}<%={{ }}=%>"
+          to: {{email_address}}
+          from: "GitHub Actions <noreply@github.com>"
+          body: |
+            iOS patch for {{=<% %>=}}${{ inputs.environment }}<%={{ }}=%> environment completed with status: {{=<% %>=}}${{ job.status }}<%={{ }}=%>
+            Version: {{=<% %>=}}${{ inputs.semantic_version }}<%={{ }}=%>+{{=<% %>=}}${{ inputs.build_number }}<%={{ }}=%>
+            Repository: {{=<% %>=}}${{ github.repository }}<%={{ }}=%>
+            Branch: {{=<% %>=}}${{ github.ref }}<%={{ }}=%>
+        continue-on-error: true

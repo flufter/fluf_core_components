@@ -1,0 +1,235 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - 'release/v*'
+
+jobs:
+  parse:
+    name: Parse release info
+    runs-on: ubuntu-latest
+    outputs:
+      env_name: {{=<% %>=}}${{ steps.parse.outputs.env_name }}<%={{ }}=%>
+      is_build: {{=<% %>=}}${{ steps.parse.outputs.is_build }}<%={{ }}=%>
+      is_patch: {{=<% %>=}}${{ steps.parse.outputs.is_patch }}<%={{ }}=%>
+      version: {{=<% %>=}}${{ steps.version.outputs.version }}<%={{ }}=%>
+      build_number: {{=<% %>=}}${{ steps.version.outputs.build_number }}<%={{ }}=%>
+      semantic_version: {{=<% %>=}}${{ steps.version.outputs.semantic_version }}<%={{ }}=%>
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse branch name
+        id: parse
+        run: |
+          BRANCH="{{=<% %>=}}${GITHUB_REF#refs/heads/}<%={{ }}=%>"
+          echo "Branch: $BRANCH"
+
+          # Extract environment from branch name
+          # Format: release/vX.Y.Z-ENV or release/vX.Y.Z-ENV-patch
+          ENV=$(echo "$BRANCH" | sed -E 's|release/v[0-9]+\.[0-9]+\.[0-9]+-([a-z]+)(-patch)?|\1|')
+          echo "env_name=$ENV" >> $GITHUB_OUTPUT
+
+          # Detect build type from commit message
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          echo "Commit message: $COMMIT_MSG"
+
+          if [[ "$COMMIT_MSG" == *"buildcd"* ]]; then
+            echo "is_build=true" >> $GITHUB_OUTPUT
+            echo "is_patch=false" >> $GITHUB_OUTPUT
+          elif [[ "$COMMIT_MSG" == *"patchcd"* ]]; then
+            echo "is_build=false" >> $GITHUB_OUTPUT
+            echo "is_patch=true" >> $GITHUB_OUTPUT
+          else
+            echo "No build or patch flag found in commit message."
+            echo "is_build=false" >> $GITHUB_OUTPUT
+            echo "is_patch=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Get version from pubspec
+        id: version
+        run: |
+          VERSION_LINE=$(grep "^version:" pubspec.yaml || echo "")
+          if [ -z "$VERSION_LINE" ]; then
+            echo "Error: Version line not found in pubspec.yaml"
+            exit 1
+          fi
+          VERSION=$(echo "$VERSION_LINE" | sed 's/^version:[[:space:]]*//')
+
+          if [[ ! $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+\+[0-9]+$ ]]; then
+            echo "Error: Invalid version format: $VERSION"
+            exit 1
+          fi
+
+          SEMANTIC_VERSION=$(echo "$VERSION" | cut -d'+' -f1)
+          BUILD_NUMBER=$(echo "$VERSION" | cut -d'+' -f2)
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "semantic_version=$SEMANTIC_VERSION" >> $GITHUB_OUTPUT
+          echo "build_number=$BUILD_NUMBER" >> $GITHUB_OUTPUT
+          echo "Parsed version: $SEMANTIC_VERSION+$BUILD_NUMBER"
+
+  {{#has_prod_env}}
+  build-ios-prod:
+    name: Build iOS (prod)
+    needs: parse
+    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'prod' && needs.parse.outputs.is_build == 'true' }}<%={{ }}=%>
+    uses: ./.github/workflows/build-ios.yml
+    with:
+      environment: prod
+      bundle_id: {{ios_bundle_id_prod}}
+      app_id: "{{app_id_ios_prod}}"
+      semantic_version: {{=<% %>=}}${{ needs.parse.outputs.semantic_version }}<%={{ }}=%>
+      build_number: {{=<% %>=}}${{ needs.parse.outputs.build_number }}<%={{ }}=%>
+      flutter_version: "{{flutter_version}}"
+    secrets: inherit
+
+  build-android-prod:
+    name: Build Android (prod)
+    needs: parse
+    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'prod' && needs.parse.outputs.is_build == 'true' }}<%={{ }}=%>
+    uses: ./.github/workflows/build-android.yml
+    with:
+      environment: prod
+      semantic_version: {{=<% %>=}}${{ needs.parse.outputs.semantic_version }}<%={{ }}=%>
+      build_number: {{=<% %>=}}${{ needs.parse.outputs.build_number }}<%={{ }}=%>
+      flutter_version: "{{flutter_version}}"
+    secrets: inherit
+
+  {{#has_core_shorebird}}
+  patch-ios-prod:
+    name: Patch iOS (prod)
+    needs: parse
+    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'prod' && needs.parse.outputs.is_patch == 'true' }}<%={{ }}=%>
+    uses: ./.github/workflows/patch-ios.yml
+    with:
+      environment: prod
+      bundle_id: {{ios_bundle_id_prod}}
+      semantic_version: {{=<% %>=}}${{ needs.parse.outputs.semantic_version }}<%={{ }}=%>
+      build_number: {{=<% %>=}}${{ needs.parse.outputs.build_number }}<%={{ }}=%>
+      flutter_version: "{{flutter_version}}"
+    secrets: inherit
+
+  patch-android-prod:
+    name: Patch Android (prod)
+    needs: parse
+    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'prod' && needs.parse.outputs.is_patch == 'true' }}<%={{ }}=%>
+    uses: ./.github/workflows/patch-android.yml
+    with:
+      environment: prod
+      semantic_version: {{=<% %>=}}${{ needs.parse.outputs.semantic_version }}<%={{ }}=%>
+      build_number: {{=<% %>=}}${{ needs.parse.outputs.build_number }}<%={{ }}=%>
+      flutter_version: "{{flutter_version}}"
+    secrets: inherit
+  {{/has_core_shorebird}}
+  {{/has_prod_env}}
+
+  {{#has_stag_env}}
+  build-ios-stag:
+    name: Build iOS (stag)
+    needs: parse
+    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'stag' && needs.parse.outputs.is_build == 'true' }}<%={{ }}=%>
+    uses: ./.github/workflows/build-ios.yml
+    with:
+      environment: stag
+      bundle_id: {{ios_bundle_id_stag}}
+      app_id: "{{app_id_ios_stag}}"
+      semantic_version: {{=<% %>=}}${{ needs.parse.outputs.semantic_version }}<%={{ }}=%>
+      build_number: {{=<% %>=}}${{ needs.parse.outputs.build_number }}<%={{ }}=%>
+      flutter_version: "{{flutter_version}}"
+    secrets: inherit
+
+  build-android-stag:
+    name: Build Android (stag)
+    needs: parse
+    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'stag' && needs.parse.outputs.is_build == 'true' }}<%={{ }}=%>
+    uses: ./.github/workflows/build-android.yml
+    with:
+      environment: stag
+      semantic_version: {{=<% %>=}}${{ needs.parse.outputs.semantic_version }}<%={{ }}=%>
+      build_number: {{=<% %>=}}${{ needs.parse.outputs.build_number }}<%={{ }}=%>
+      flutter_version: "{{flutter_version}}"
+    secrets: inherit
+
+  {{#has_core_shorebird}}
+  patch-ios-stag:
+    name: Patch iOS (stag)
+    needs: parse
+    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'stag' && needs.parse.outputs.is_patch == 'true' }}<%={{ }}=%>
+    uses: ./.github/workflows/patch-ios.yml
+    with:
+      environment: stag
+      bundle_id: {{ios_bundle_id_stag}}
+      semantic_version: {{=<% %>=}}${{ needs.parse.outputs.semantic_version }}<%={{ }}=%>
+      build_number: {{=<% %>=}}${{ needs.parse.outputs.build_number }}<%={{ }}=%>
+      flutter_version: "{{flutter_version}}"
+    secrets: inherit
+
+  patch-android-stag:
+    name: Patch Android (stag)
+    needs: parse
+    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'stag' && needs.parse.outputs.is_patch == 'true' }}<%={{ }}=%>
+    uses: ./.github/workflows/patch-android.yml
+    with:
+      environment: stag
+      semantic_version: {{=<% %>=}}${{ needs.parse.outputs.semantic_version }}<%={{ }}=%>
+      build_number: {{=<% %>=}}${{ needs.parse.outputs.build_number }}<%={{ }}=%>
+      flutter_version: "{{flutter_version}}"
+    secrets: inherit
+  {{/has_core_shorebird}}
+  {{/has_stag_env}}
+
+  {{#has_testing_env}}
+  build-ios-testing:
+    name: Build iOS (testing)
+    needs: parse
+    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'testing' && needs.parse.outputs.is_build == 'true' }}<%={{ }}=%>
+    uses: ./.github/workflows/build-ios.yml
+    with:
+      environment: testing
+      bundle_id: {{ios_bundle_id_testing}}
+      app_id: "{{app_id_ios_testing}}"
+      semantic_version: {{=<% %>=}}${{ needs.parse.outputs.semantic_version }}<%={{ }}=%>
+      build_number: {{=<% %>=}}${{ needs.parse.outputs.build_number }}<%={{ }}=%>
+      flutter_version: "{{flutter_version}}"
+    secrets: inherit
+
+  build-android-testing:
+    name: Build Android (testing)
+    needs: parse
+    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'testing' && needs.parse.outputs.is_build == 'true' }}<%={{ }}=%>
+    uses: ./.github/workflows/build-android.yml
+    with:
+      environment: testing
+      semantic_version: {{=<% %>=}}${{ needs.parse.outputs.semantic_version }}<%={{ }}=%>
+      build_number: {{=<% %>=}}${{ needs.parse.outputs.build_number }}<%={{ }}=%>
+      flutter_version: "{{flutter_version}}"
+    secrets: inherit
+
+  {{#has_core_shorebird}}
+  patch-ios-testing:
+    name: Patch iOS (testing)
+    needs: parse
+    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'testing' && needs.parse.outputs.is_patch == 'true' }}<%={{ }}=%>
+    uses: ./.github/workflows/patch-ios.yml
+    with:
+      environment: testing
+      bundle_id: {{ios_bundle_id_testing}}
+      semantic_version: {{=<% %>=}}${{ needs.parse.outputs.semantic_version }}<%={{ }}=%>
+      build_number: {{=<% %>=}}${{ needs.parse.outputs.build_number }}<%={{ }}=%>
+      flutter_version: "{{flutter_version}}"
+    secrets: inherit
+
+  patch-android-testing:
+    name: Patch Android (testing)
+    needs: parse
+    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'testing' && needs.parse.outputs.is_patch == 'true' }}<%={{ }}=%>
+    uses: ./.github/workflows/patch-android.yml
+    with:
+      environment: testing
+      semantic_version: {{=<% %>=}}${{ needs.parse.outputs.semantic_version }}<%={{ }}=%>
+      build_number: {{=<% %>=}}${{ needs.parse.outputs.build_number }}<%={{ }}=%>
+      flutter_version: "{{flutter_version}}"
+    secrets: inherit
+  {{/has_core_shorebird}}
+  {{/has_testing_env}}

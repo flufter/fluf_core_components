@@ -1,0 +1,83 @@
+name: core_github_actions
+description: A Flutter brick that generates GitHub Actions CI/CD workflows using Codemagic CLI tools for iOS signing, Android signing, and store publishing.
+
+# The following defines the brick repository url.
+# Uncomment and update the following line before publishing the brick.
+# repository: https://github.com/my_org/my_repo
+
+# The following defines the version and build number for your brick.
+# A version number is three numbers separated by dots, like 1.2.34
+# followed by an optional build number (separated by a +).
+version: 0.1.0
+
+# The following defines the environment for the current brick.
+# It includes the version of mason that the brick requires.
+environment:
+  mason: ">=0.1.0 <0.2.0"
+
+# Variables specify dynamic values that your brick depends on.
+# Zero or more variables can be specified for a given brick.
+# Each variable has:
+#  * a type (string, number, boolean, enum, or array)
+#  * an optional short description
+#  * an optional default value
+#  * an optional list of default values (array only)
+#  * an optional prompt phrase used when asking for the variable
+#  * a list of values (enums only)
+
+vars:
+  has_core_firebase:
+    type: boolean
+    description: Whether the app has Firebase
+    default: false
+  has_core_shorebird:
+    type: boolean
+    description: Whether the app has Shorebird
+    default: false
+  flutter_version:
+    type: string
+    description: The version of Flutter to use
+  project_name:
+    type: string
+    description: The project name
+  ios_bundle_id_prod:
+    type: string
+    description: iOS bundle ID for production
+    default: com.example.app
+  ios_bundle_id_stag:
+    type: string
+    description: iOS bundle ID for staging
+    default: com.example.app.stag
+  ios_bundle_id_testing:
+    type: string
+    description: iOS bundle ID for testing
+    default: com.example.app.testing
+  has_prod_env:
+    type: boolean
+    default: true
+  has_stag_env:
+    type: boolean
+    default: false
+  has_testing_env:
+    type: boolean
+    default: false
+  email_address:
+    type: string
+    description: An email address for notifications
+    default: email@example.com
+  app_id_ios_prod:
+    type: number
+    description: The App Store Connect App ID for production
+    default: 1234567890
+  app_id_ios_stag:
+    type: number
+    description: The App Store Connect App ID for staging
+    default: 1234567890
+  app_id_ios_testing:
+    type: number
+    description: The App Store Connect App ID for testing
+    default: 1234567890
+  ios_copyright:
+    type: string
+    description: The copyright for iOS
+    default: "© 2024 Your Company"
