@@ -52,15 +52,6 @@ vars:
     type: string
     description: iOS bundle ID for testing
     default: com.example.app.testing
-  has_prod_env:
-    type: boolean
-    default: true
-  has_stag_env:
-    type: boolean
-    default: false
-  has_testing_env:
-    type: boolean
-    default: false
   email_address:
     type: string
     description: An email address for notifications
