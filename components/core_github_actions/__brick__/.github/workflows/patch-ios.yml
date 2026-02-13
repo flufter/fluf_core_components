@@ -47,7 +47,9 @@ jobs:
 
       # --- Codemagic CLI Tools (for signing) ---
       - name: Install Codemagic CLI tools
-        run: pip3 install codemagic-cli-tools
+        run: |
+          python3 -m pip install --user codemagic-cli-tools
+          echo "$HOME/Library/Python/$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')/bin" >> $GITHUB_PATH
 
       # --- Environment variable to uppercase ---
       - name: Compute uppercase environment name
