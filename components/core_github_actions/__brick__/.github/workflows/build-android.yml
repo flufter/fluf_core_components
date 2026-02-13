@@ -51,7 +51,9 @@ jobs:
 
       # --- Codemagic CLI Tools (for publishing) ---
       - name: Install Codemagic CLI tools
-        run: pip3 install codemagic-cli-tools
+        run: |
+          sudo apt-get install -y pipx
+          pipx install codemagic-cli-tools
 
       # --- Environment variable to uppercase ---
       - name: Compute uppercase environment name
