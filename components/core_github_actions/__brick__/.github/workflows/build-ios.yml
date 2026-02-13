@@ -158,6 +158,11 @@ jobs:
             echo "build_runner not found in pubspec.yaml. Skipping build_runner."
           fi
 
+      {{#has_core_firebase}}
+      - name: Install FlutterFire CLI
+        run: dart pub global activate flutterfire_cli
+      {{/has_core_firebase}}
+
       - name: Install CocoaPods dependencies
         run: |
           cd ios && pod install && cd ..
