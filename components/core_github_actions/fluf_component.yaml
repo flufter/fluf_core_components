@@ -49,10 +49,6 @@ parameters:
     type: string
     query: "What is the iOS Bundle ID?"
     fromAppConfig: ios_bundle_id
-    environments:
-      - prod
-      - stag
-      - testing
 
   - name: ios_copyright
     organisation: fluf

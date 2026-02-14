@@ -93,7 +93,7 @@ jobs:
     uses: ./.github/workflows/build-ios.yml
     with:
       environment: prod
-      bundle_id: {{ios_bundle_id_prod}}
+      bundle_id: {{ios_bundle_id}}
       app_id: "{{app_id_ios_prod}}"
       semantic_version: {{=<% %>=}}${{ needs.parse.outputs.semantic_version }}<%={{ }}=%>
       build_number: {{=<% %>=}}${{ needs.parse.outputs.build_number }}<%={{ }}=%>
@@ -120,7 +120,7 @@ jobs:
     uses: ./.github/workflows/patch-ios.yml
     with:
       environment: prod
-      bundle_id: {{ios_bundle_id_prod}}
+      bundle_id: {{ios_bundle_id}}
       semantic_version: {{=<% %>=}}${{ needs.parse.outputs.semantic_version }}<%={{ }}=%>
       build_number: {{=<% %>=}}${{ needs.parse.outputs.build_number }}<%={{ }}=%>
       flutter_version: "{{flutter_version}}"
@@ -148,7 +148,7 @@ jobs:
     uses: ./.github/workflows/build-ios.yml
     with:
       environment: stag
-      bundle_id: {{ios_bundle_id_stag}}
+      bundle_id: {{ios_bundle_id}}.stag
       app_id: "{{app_id_ios_stag}}"
       semantic_version: {{=<% %>=}}${{ needs.parse.outputs.semantic_version }}<%={{ }}=%>
       build_number: {{=<% %>=}}${{ needs.parse.outputs.build_number }}<%={{ }}=%>
@@ -175,7 +175,7 @@ jobs:
     uses: ./.github/workflows/patch-ios.yml
     with:
       environment: stag
-      bundle_id: {{ios_bundle_id_stag}}
+      bundle_id: {{ios_bundle_id}}.stag
       semantic_version: {{=<% %>=}}${{ needs.parse.outputs.semantic_version }}<%={{ }}=%>
       build_number: {{=<% %>=}}${{ needs.parse.outputs.build_number }}<%={{ }}=%>
       flutter_version: "{{flutter_version}}"
@@ -203,7 +203,7 @@ jobs:
     uses: ./.github/workflows/build-ios.yml
     with:
       environment: testing
-      bundle_id: {{ios_bundle_id_testing}}
+      bundle_id: {{ios_bundle_id}}.testing
       app_id: "{{app_id_ios_testing}}"
       semantic_version: {{=<% %>=}}${{ needs.parse.outputs.semantic_version }}<%={{ }}=%>
       build_number: {{=<% %>=}}${{ needs.parse.outputs.build_number }}<%={{ }}=%>
@@ -230,7 +230,7 @@ jobs:
     uses: ./.github/workflows/patch-ios.yml
     with:
       environment: testing
-      bundle_id: {{ios_bundle_id_testing}}
+      bundle_id: {{ios_bundle_id}}.testing
       semantic_version: {{=<% %>=}}${{ needs.parse.outputs.semantic_version }}<%={{ }}=%>
       build_number: {{=<% %>=}}${{ needs.parse.outputs.build_number }}<%={{ }}=%>
       flutter_version: "{{flutter_version}}"

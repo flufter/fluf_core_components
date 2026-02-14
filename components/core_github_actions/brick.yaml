@@ -40,18 +40,10 @@ vars:
   project_name:
     type: string
     description: The project name
-  ios_bundle_id_prod:
+  ios_bundle_id:
     type: string
-    description: iOS bundle ID for production
+    description: iOS bundle ID (base, without environment suffix)
     default: com.example.app
-  ios_bundle_id_stag:
-    type: string
-    description: iOS bundle ID for staging
-    default: com.example.app.stag
-  ios_bundle_id_testing:
-    type: string
-    description: iOS bundle ID for testing
-    default: com.example.app.testing
   email_address:
     type: string
     description: An email address for notifications
