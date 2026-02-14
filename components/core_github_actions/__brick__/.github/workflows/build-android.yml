@@ -204,8 +204,11 @@ jobs:
         env:
           GCLOUD_SERVICE_ACCOUNT_CREDENTIALS: {{=<% %>=}}${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}<%={{ }}=%>
         run: |
+          PACKAGE_NAME=$(grep -r 'applicationId' android/app/build.gradle android/app/build.gradle.kts 2>/dev/null | head -1 | sed 's/.*applicationId\s*=\?\s*["\x27]\([^"\x27]*\)["\x27].*/\1/')
+          echo "Package name: $PACKAGE_NAME"
+
           google-play bundles publish \
-            --package-name "$(grep 'applicationId' android/app/build.gradle | head -1 | sed "s/.*'\(.*\)'.*/\1/" || echo '')" \
+            --package-name "$PACKAGE_NAME" \
             --bundle "build/app/outputs/bundle/${ENV}Release/app-${ENV}-release.aab" \
             --track "$GOOGLE_PLAY_TRACK" \
             --credentials "$GCLOUD_SERVICE_ACCOUNT_CREDENTIALS"
