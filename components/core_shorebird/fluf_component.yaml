@@ -2,7 +2,7 @@ component:
   name: shorebird
   organisation: core
   description: "This component is used to configure the Shorebird project."
-  version: "0.2.2"
+  version: "0.2.3"
   type: singleton
   status: hidden
   starterProject: null
