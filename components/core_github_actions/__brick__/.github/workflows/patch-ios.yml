@@ -140,9 +140,8 @@ jobs:
         run: xcode-project use-profiles
 
       # --- Build ---
-      - name: Clean and rebuild Flutter app
+      - name: Install dependencies
         run: |
-          flutter clean
           flutter pub get
           if grep -q "build_runner" pubspec.yaml; then
             echo "Running build_runner..."
@@ -156,9 +155,24 @@ jobs:
         run: dart pub global activate flutterfire_cli
       {{/has_core_firebase}}
 
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: ios/Pods
+          key: {{=<% %>=}}${{ runner.os }}-pods-${{ inputs.flutter_version }}-${{ hashFiles('ios/Podfile.lock') }}-${{ hashFiles('pubspec.lock') }}<%={{ }}=%>
+          restore-keys: |
+            {{=<% %>=}}${{ runner.os }}-pods-${{ inputs.flutter_version }}-${{ hashFiles('ios/Podfile.lock') }}-<%={{ }}=%>
+            {{=<% %>=}}${{ runner.os }}-pods-${{ inputs.flutter_version }}-<%={{ }}=%>
+
       - name: Install CocoaPods dependencies
         run: |
-          cd ios && pod install && cd ..
+          cd ios
+          if [ -d "Pods" ]; then
+            pod install --no-repo-update || pod install
+          else
+            pod install
+          fi
+          cd ..
 
       - name: Build Font Awesome Icons
         run: |

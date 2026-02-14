@@ -13,6 +13,8 @@ jobs:
       env_name: {{=<% %>=}}${{ steps.parse.outputs.env_name }}<%={{ }}=%>
       is_build: {{=<% %>=}}${{ steps.parse.outputs.is_build }}<%={{ }}=%>
       is_patch: {{=<% %>=}}${{ steps.parse.outputs.is_patch }}<%={{ }}=%>
+      build_ios: {{=<% %>=}}${{ steps.parse.outputs.build_ios }}<%={{ }}=%>
+      build_android: {{=<% %>=}}${{ steps.parse.outputs.build_android }}<%={{ }}=%>
       version: {{=<% %>=}}${{ steps.version.outputs.version }}<%={{ }}=%>
       build_number: {{=<% %>=}}${{ steps.version.outputs.build_number }}<%={{ }}=%>
       semantic_version: {{=<% %>=}}${{ steps.version.outputs.semantic_version }}<%={{ }}=%>
@@ -34,17 +36,31 @@ jobs:
           COMMIT_MSG=$(git log -1 --pretty=%B)
           echo "Commit message: $COMMIT_MSG"
 
-          if [[ "$COMMIT_MSG" == *"buildcd"* ]]; then
-            echo "is_build=true" >> $GITHUB_OUTPUT
-            echo "is_patch=false" >> $GITHUB_OUTPUT
+          BUILD_IOS=false
+          BUILD_ANDROID=false
+          IS_BUILD=false
+          IS_PATCH=false
+
+          if [[ "$COMMIT_MSG" == *"buildcd-ios"* ]]; then
+            IS_BUILD=true; BUILD_IOS=true
+          elif [[ "$COMMIT_MSG" == *"buildcd-android"* ]]; then
+            IS_BUILD=true; BUILD_ANDROID=true
+          elif [[ "$COMMIT_MSG" == *"buildcd"* ]]; then
+            IS_BUILD=true; BUILD_IOS=true; BUILD_ANDROID=true
+          elif [[ "$COMMIT_MSG" == *"patchcd-ios"* ]]; then
+            IS_PATCH=true; BUILD_IOS=true
+          elif [[ "$COMMIT_MSG" == *"patchcd-android"* ]]; then
+            IS_PATCH=true; BUILD_ANDROID=true
           elif [[ "$COMMIT_MSG" == *"patchcd"* ]]; then
-            echo "is_build=false" >> $GITHUB_OUTPUT
-            echo "is_patch=true" >> $GITHUB_OUTPUT
+            IS_PATCH=true; BUILD_IOS=true; BUILD_ANDROID=true
           else
             echo "No build or patch flag found in commit message."
-            echo "is_build=false" >> $GITHUB_OUTPUT
-            echo "is_patch=false" >> $GITHUB_OUTPUT
           fi
+
+          echo "is_build=$IS_BUILD" >> $GITHUB_OUTPUT
+          echo "is_patch=$IS_PATCH" >> $GITHUB_OUTPUT
+          echo "build_ios=$BUILD_IOS" >> $GITHUB_OUTPUT
+          echo "build_android=$BUILD_ANDROID" >> $GITHUB_OUTPUT
 
       - name: Get version from pubspec
         id: version
@@ -73,7 +89,7 @@ jobs:
   build-ios-prod:
     name: Build iOS (prod)
     needs: parse
-    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'prod' && needs.parse.outputs.is_build == 'true' }}<%={{ }}=%>
+    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'prod' && needs.parse.outputs.is_build == 'true' && needs.parse.outputs.build_ios == 'true' }}<%={{ }}=%>
     uses: ./.github/workflows/build-ios.yml
     with:
       environment: prod
@@ -87,7 +103,7 @@ jobs:
   build-android-prod:
     name: Build Android (prod)
     needs: parse
-    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'prod' && needs.parse.outputs.is_build == 'true' }}<%={{ }}=%>
+    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'prod' && needs.parse.outputs.is_build == 'true' && needs.parse.outputs.build_android == 'true' }}<%={{ }}=%>
     uses: ./.github/workflows/build-android.yml
     with:
       environment: prod
@@ -100,7 +116,7 @@ jobs:
   patch-ios-prod:
     name: Patch iOS (prod)
     needs: parse
-    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'prod' && needs.parse.outputs.is_patch == 'true' }}<%={{ }}=%>
+    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'prod' && needs.parse.outputs.is_patch == 'true' && needs.parse.outputs.build_ios == 'true' }}<%={{ }}=%>
     uses: ./.github/workflows/patch-ios.yml
     with:
       environment: prod
@@ -113,7 +129,7 @@ jobs:
   patch-android-prod:
     name: Patch Android (prod)
     needs: parse
-    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'prod' && needs.parse.outputs.is_patch == 'true' }}<%={{ }}=%>
+    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'prod' && needs.parse.outputs.is_patch == 'true' && needs.parse.outputs.build_android == 'true' }}<%={{ }}=%>
     uses: ./.github/workflows/patch-android.yml
     with:
       environment: prod
@@ -128,7 +144,7 @@ jobs:
   build-ios-stag:
     name: Build iOS (stag)
     needs: parse
-    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'stag' && needs.parse.outputs.is_build == 'true' }}<%={{ }}=%>
+    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'stag' && needs.parse.outputs.is_build == 'true' && needs.parse.outputs.build_ios == 'true' }}<%={{ }}=%>
     uses: ./.github/workflows/build-ios.yml
     with:
       environment: stag
@@ -142,7 +158,7 @@ jobs:
   build-android-stag:
     name: Build Android (stag)
     needs: parse
-    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'stag' && needs.parse.outputs.is_build == 'true' }}<%={{ }}=%>
+    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'stag' && needs.parse.outputs.is_build == 'true' && needs.parse.outputs.build_android == 'true' }}<%={{ }}=%>
     uses: ./.github/workflows/build-android.yml
     with:
       environment: stag
@@ -155,7 +171,7 @@ jobs:
   patch-ios-stag:
     name: Patch iOS (stag)
     needs: parse
-    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'stag' && needs.parse.outputs.is_patch == 'true' }}<%={{ }}=%>
+    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'stag' && needs.parse.outputs.is_patch == 'true' && needs.parse.outputs.build_ios == 'true' }}<%={{ }}=%>
     uses: ./.github/workflows/patch-ios.yml
     with:
       environment: stag
@@ -168,7 +184,7 @@ jobs:
   patch-android-stag:
     name: Patch Android (stag)
     needs: parse
-    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'stag' && needs.parse.outputs.is_patch == 'true' }}<%={{ }}=%>
+    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'stag' && needs.parse.outputs.is_patch == 'true' && needs.parse.outputs.build_android == 'true' }}<%={{ }}=%>
     uses: ./.github/workflows/patch-android.yml
     with:
       environment: stag
@@ -183,7 +199,7 @@ jobs:
   build-ios-testing:
     name: Build iOS (testing)
     needs: parse
-    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'testing' && needs.parse.outputs.is_build == 'true' }}<%={{ }}=%>
+    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'testing' && needs.parse.outputs.is_build == 'true' && needs.parse.outputs.build_ios == 'true' }}<%={{ }}=%>
     uses: ./.github/workflows/build-ios.yml
     with:
       environment: testing
@@ -197,7 +213,7 @@ jobs:
   build-android-testing:
     name: Build Android (testing)
     needs: parse
-    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'testing' && needs.parse.outputs.is_build == 'true' }}<%={{ }}=%>
+    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'testing' && needs.parse.outputs.is_build == 'true' && needs.parse.outputs.build_android == 'true' }}<%={{ }}=%>
     uses: ./.github/workflows/build-android.yml
     with:
       environment: testing
@@ -210,7 +226,7 @@ jobs:
   patch-ios-testing:
     name: Patch iOS (testing)
     needs: parse
-    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'testing' && needs.parse.outputs.is_patch == 'true' }}<%={{ }}=%>
+    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'testing' && needs.parse.outputs.is_patch == 'true' && needs.parse.outputs.build_ios == 'true' }}<%={{ }}=%>
     uses: ./.github/workflows/patch-ios.yml
     with:
       environment: testing
@@ -223,7 +239,7 @@ jobs:
   patch-android-testing:
     name: Patch Android (testing)
     needs: parse
-    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'testing' && needs.parse.outputs.is_patch == 'true' }}<%={{ }}=%>
+    if: {{=<% %>=}}${{ needs.parse.outputs.env_name == 'testing' && needs.parse.outputs.is_patch == 'true' && needs.parse.outputs.build_android == 'true' }}<%={{ }}=%>
     uses: ./.github/workflows/patch-android.yml
     with:
       environment: testing

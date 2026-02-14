@@ -37,6 +37,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+          cache: 'gradle'
 
       # --- Flutter Setup ---
       - name: Set up Flutter
@@ -130,9 +131,8 @@ jobs:
           echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
 
       # --- Build ---
-      - name: Clean and rebuild Flutter app
+      - name: Install dependencies
         run: |
-          flutter clean
           flutter pub get
           if grep -q "build_runner" pubspec.yaml; then
             echo "Running build_runner..."
