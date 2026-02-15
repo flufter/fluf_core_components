@@ -2,7 +2,7 @@ component:
   name: codemagic
   organisation: core
   description: "This component is used to configure the Codemagic CI/CD pipeline."
-  version: "0.2.4"
+  version: "1.0.0"
   type: singleton
   status: hidden
   starterProject: null
