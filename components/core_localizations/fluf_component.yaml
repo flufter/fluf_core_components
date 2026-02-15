@@ -2,7 +2,7 @@ component:
   name: localizations
   organisation: core
   description: "This component is used to configure Localizations for the project."
-  version: "1.0.0"
+  version: "1.0.1"
   type: singleton
   status: published
   starterProject: flutter_starter

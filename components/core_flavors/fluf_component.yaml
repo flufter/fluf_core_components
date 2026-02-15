@@ -2,7 +2,7 @@ component:
   name: flavors
   organisation: core
   description: "This component is used to configure the flavors."
-  version: "1.0.0"
+  version: "1.0.1"
   type: singleton
   status: hidden
   starterProject: null

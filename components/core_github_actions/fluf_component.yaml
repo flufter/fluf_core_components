@@ -2,7 +2,7 @@ component:
   name: github_actions
   organisation: core
   description: "GitHub Actions CI/CD pipeline using Codemagic CLI tools for signing and publishing."
-  version: "1.0.0"
+  version: "1.0.1"
   type: singleton
   status: hidden
   starterProject: null
