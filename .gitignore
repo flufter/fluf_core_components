@@ -3,6 +3,12 @@
 .mason/**
 mason-lock.json
 
+# Dart build artifacts
+.dart_tool/
+package_config.json
+package_graph.json
+pubspec.lock
+
 # Bundle artifacts (replaced by tag-based releases)
 latest/
 archives/
