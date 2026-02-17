@@ -2,7 +2,7 @@ component:
   name: splash_screen
   organisation: core
   description: "This component is used to configure the splash screen."
-  version: "1.1.0"
+  version: "1.2.0"
   type: singleton
   status: hidden
   starterProject: null

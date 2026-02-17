@@ -2,7 +2,7 @@ component:
   name: app_icon
   organisation: core
   description: "This component is used to update the app icon."
-  version: "1.1.0"
+  version: "1.2.0"
   type: singleton
   status: hidden
   starterProject: null
