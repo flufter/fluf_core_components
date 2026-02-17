@@ -8,17 +8,11 @@ component:
   starterProject: null
   dependencies: []
   flags: []
-  params:
-    - firebase_service_account_cred_path
+  params: []
   vars: []
   hooks:
     preInstallation: null
     postInstallation: null
 
-parameters:
-  - name: firebase_service_account_cred_path
-    organisation: fluf
-    type: string
-    query: "What is the path to the Firebase Service Account Credentials?"
-
+parameters: []
 variables: []
