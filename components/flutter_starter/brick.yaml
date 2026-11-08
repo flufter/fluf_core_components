@@ -25,6 +25,11 @@ environment:
 #  * an optional prompt phrase used when asking for the variable
 #  * a list of values (enums only)
 vars:
+  project_name:
+    type: string
+    description: The name of the project (used as the package name in imports and the app title)
+    default: my_project_name
+    prompt: What is the name of the project?
   has_core_firebase:
     type: boolean
     description: Whether the project has firebase
@@ -32,6 +37,6 @@ vars:
     prompt: Does the project have firebase?
   has_core_splash_screen:
     type: boolean
-    description: Whether the project has firebase
+    description: Whether the project has the core_splash_screen component installed
     default: false
-    prompt: Does the project have firebase?
+    prompt: Does the project have the core_splash_screen component?
